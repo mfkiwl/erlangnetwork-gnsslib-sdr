@@ -1,16 +1,15 @@
-GNSS-SDRLIB v3.x
+Erlang Network GNSS-SDRLIB v3.x (Linux)
 ===============================================================================
-An Open Source GNSS Software Defined Radio Library
-
+An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
 Author
 -------------------------------------------------------------------------------
-Taro Suzuki  
+Taro Suzuki  (GNSS-SDRLIB)
 E-Mail: <gnsssdrlib@gmail.com>
 HP: <http://www.taroz.net>
 
 
-Shu Wang  
+Shu Wang  (Erlang Network)
 Email: shu@erlangnetwork.com
 Blog: https://blog.erlangnetwork.com
 
@@ -43,7 +42,7 @@ Features
 
 System Requirements
 -------------------------------------------------------------------------------
-* GNSS-SDRLIB v3.x works on various Debian based Linux distribution, including Ubuntu, Raspbian OS.
+* Erlang Network GNSS-SDRLIB works on various Debian based Linux distribution, including Ubuntu, Raspbian OS.
 * SIMD SSE2 supported CPU (Pentium IV and later processor) is recommended.
 
 Directory and Files
@@ -51,6 +50,7 @@ Directory and Files
     ./bin                   Executable APs for Windows  
         ./gnss-sdrcli.exe   Real-time GNSS signal processing AP (CLI)  
         ./gnss-sdrcli.ini   Configuration file for CLI AP  
+        ./Makefile          Makefile
     ./frontend              Directory of front-end configuration files  
     ./src                   Library source codes  
         ./sdr.h             Library header file  
@@ -73,7 +73,11 @@ Directory and Files
         ./sdrsync.c         Functions related to generating observation data  
         ./sdrtrk.c          Functions related to signal tracking  
         ./rcv               Source codes related to front-end  
+            ./rtl-sdr
     ./lib                   Source codes related to used library  
+        ./RTKLIB
+        ./k9aq-fec
+        ./fftw3
     ./test                  Test data  
         ./data              Test IF data  
         ./output            Default RINEX output directory  
