@@ -1,0 +1,9 @@
+[submodule "lib/ka9q-fec"]
+	path = lib/ka9q-fec
+	url = https://github.com/Opendigitalradio/ka9q-fec.git
+[submodule "lib/RTKLIB"]
+	path = lib/RTKLIB
+	url = https://github.com/tomojitakasu/RTKLIB.git
+[submodule "lib/fftw3"]
+	path = lib/fftw3
+	url = https://github.com/FFTW/fftw3.git
