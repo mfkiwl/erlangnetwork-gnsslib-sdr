@@ -1,6 +1,10 @@
-Erlang Network GNSS-SDRLIB v3.x (Community Linux Edition)
+Erlang Network GNSS-SDRLIB v3.x (Community Edition)
 ===============================================================================
 An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
+
+System Requirements
+-------------------------------------------------------------------------------
+* Erlang Network GNSS-SDRLIB works on various Debian based Linux distribution.
 
 Author
 -------------------------------------------------------------------------------
@@ -39,11 +43,6 @@ Features
     * Nuand BladeRF <http://nuand.com/>
     * RTL-SDR <http://sdr.osmocom.org/trac/wiki/rtl-sdr>
 * Support RF binary file for post processing
-
-System Requirements
--------------------------------------------------------------------------------
-* Erlang Network GNSS-SDRLIB works on various Debian based Linux distribution, including Ubuntu, Raspbian OS.
-* SIMD SSE2 supported CPU (Pentium IV and later processor) is recommended.
 
 Directory and Files
 -------------------------------------------------------------------------------
