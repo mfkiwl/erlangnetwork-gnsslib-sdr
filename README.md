@@ -1,4 +1,4 @@
-Erlang Network GNSS-SDRLIB v3.x (Linux)
+Erlang Network GNSS-SDRLIB v3.x (Community Linux Edition)
 ===============================================================================
 An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
