@@ -7,3 +7,6 @@
 [submodule "lib/fftw3"]
 	path = lib/fftw3
 	url = https://github.com/FFTW/fftw3.git
+[submodule "src/rcv/rtl-sdr"]
+	path = src/rcv/rtl-sdr
+	url = https://github.com/osmocom/rtl-sdr.git

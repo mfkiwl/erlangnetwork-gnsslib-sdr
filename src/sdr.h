@@ -86,7 +86,7 @@ using namespace gnsssdrgui;
 
 #include "fec.h"
 #include "fftw3.h"
-#include "rtklib.h"
+#include "../lib/RTKLIB/src/rtklib.h"
 #include "libusb-1.0/libusb.h"
 #ifdef STEREO
 #include "stereo.h"
