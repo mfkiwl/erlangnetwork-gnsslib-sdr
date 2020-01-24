@@ -6,12 +6,11 @@ System Requirements
 -------------------------------------------------------------------------------
 * Erlang Network GNSS-SDRLIB works on various Debian based Linux distributions.
 
-Author
+Authors
 -------------------------------------------------------------------------------
 Taro Suzuki  (GNSS-SDRLIB)
 E-Mail: <gnsssdrlib@gmail.com>
 HP: <http://www.taroz.net>
-
 
 Shu Wang  (Erlang Network)
 Email: shu@erlangnetwork.com
@@ -72,10 +71,10 @@ Directory and Files
         ./sdrsync.c         Functions related to generating observation data  
         ./sdrtrk.c          Functions related to signal tracking  
         ./rcv               Source codes related to front-end  
-            ./rtl-sdr
+            ./rtl-sdr       Source codes from Osmocom Opensource Project
     ./lib                   Source codes related to used library  
-        ./RTKLIB
-        ./k9aq-fec
+        ./RTKLIB            Source codes of Tomoji Takasu's open source GNSS positionining engine 
+        ./k9aq-fec          Source codes of Phil Karn, KA9Q's open source FEC library
         ./fftw3
     ./test                  Test data  
         ./data              Test IF data  
@@ -84,7 +83,8 @@ Directory and Files
 
 License
 -------------------------------------------------------------------------------
-Copyright (C) 2020 Shu Wang shuwang1@outlook.com
+Copyright (C) 2020 Shu Wang shuwang1@outlook.com 
+
 Copyright (C) 2014 Taro Suzuki gnsssdrlib@gmail.com
 
 
