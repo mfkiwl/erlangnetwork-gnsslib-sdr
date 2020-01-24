@@ -1,0 +1,26 @@
+** Install regular building tools if you haven't done so.
+$ sudo apt update && sudo apt upgrade 
+$ sudo apt install build-essential cmake git 
+
+** Clone the source codes from https://github.com/erlangnetwork/GNSS-SDRLIB.git
+$ git clone --recursive https://github.com/erlangnetwork/GNSS-SDRLIB.git
+$ cd GNSS-SDRLIB
+
+** Install KA9Q FEC library https://github.com/Opendigitalradio/ka9q-fec.git
+$ git clone --recursive https://github.com/Opendigitalradio/ka9q-fec.git  lib/ka9q-fec
+$ cd ./lib/ka9q-fec/
+$ mkdir build && cd build && cmake ..
+$ make && sudo make install && sudo ldconfig
+
+** Install FFTW from http://www.fftw.org/download.html
+In some cases, you need to build three times possibly as instructed below.
+
+$ ./configure --enable-threads --enable-shared
+$ make && sudo make install
+$ ./configure --enable-threads --enable-shared --enable-float
+$ make && sudo make install
+$ ./configure --enable-threads --enable-shared --enable-long-double
+$ make && sudo make install
+
+** Return back to the root directory of GNSS-SDRLIB, compile and run
+$ make && ./gnss-sdrlib

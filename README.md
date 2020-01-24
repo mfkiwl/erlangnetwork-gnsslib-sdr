@@ -1,4 +1,4 @@
-GNSS-SDRLIB v2.0 Beta
+GNSS-SDRLIB v3.x
 ===============================================================================
 An Open Source GNSS Software Defined Radio Library
 
@@ -10,15 +10,21 @@ E-Mail: <gnsssdrlib@gmail.com>
 HP: <http://www.taroz.net>
 
 
+Shu Wang  
+Email: shu@erlangnetwork.com
+Blog: https://blog.erlangnetwork.com
+
 Features
 -------------------------------------------------------------------------------
 * GNSS signal processing functions written in C
-    * Code generations
-    * Signal acquisition / tracking
+    * PRN code generations
+    * Signal acquisition
+    * Signal tracking
     * Decoding navigation messages 
-    * Pseudo-range / carrier phase mesurements 
-* GUI application (AP) written in C++/CLI
-* Visualization of GNSS signal processing in real-time 
+    * Pseudo-range & Doppler Measurement 
+    * Carrier phase mesurements 
+* Support hardware acceleration through SIMD instructions, such as SSE2 and AVX2
+* Support hetergenous computing acceleration through GPGPUs
 * Real-time positioning with RTKLIB (<http://www.rtklib.com/>)
 * Observation data can be outputted in RINEX or RTCM format
 * Support following signals (tracking and decoding navigation message) 
@@ -35,25 +41,17 @@ Features
     * RTL-SDR <http://sdr.osmocom.org/trac/wiki/rtl-sdr>
 * Support RF binary file for post processing
 
-
 System Requirements
 -------------------------------------------------------------------------------
-* GNSS-SDRLIB v2.0 only works in **64-bit Windows**
-* The CLI/GUI applications are built with Microsoft Visual Studio Express 2012
-* SIMD SSE2 supported CPU (Pentium IV and later processor) is required
-
+* GNSS-SDRLIB v3.x works on various Debian based Linux distribution, including Ubuntu, Raspbian OS.
+* SIMD SSE2 supported CPU (Pentium IV and later processor) is recommended.
 
 Directory and Files
 -------------------------------------------------------------------------------
     ./bin                   Executable APs for Windows  
         ./gnss-sdrcli.exe   Real-time GNSS signal processing AP (CLI)  
         ./gnss-sdrcli.ini   Configuration file for CLI AP  
-        ./gnss-sdrgui.exe   Real-time GNSS signal processing AP (GUI)  
-        ./frontend          Directory of front-end configuration files  
-        ./cli               Command line interface  
-        ./windows           VS2012 project of CLI AP (for Windows)  
-    ./linux                 Makefile of CLI AP (for Linux)  
-    ./gui                   VS2012 project of GUI AP (for Windows)  
+    ./frontend              Directory of front-end configuration files  
     ./src                   Library source codes  
         ./sdr.h             Library header file  
         ./sdracq.c          Functions related to signal acquisition  
@@ -81,14 +79,11 @@ Directory and Files
         ./output            Default RINEX output directory  
 
 
-How to use
--------------------------------------------------------------------------------
-See manual or support page <http://www.taroz.net/gnsssdrlib_e.html>
-
-
 License
 -------------------------------------------------------------------------------
-Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
+Copyright (C) 2020 Shu Wang shuwang1@outlook.com
+Copyright (C) 2014 Taro Suzuki gnsssdrlib@gmail.com
+
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
