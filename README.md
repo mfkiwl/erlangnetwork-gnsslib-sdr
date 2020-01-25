@@ -1,4 +1,4 @@
-Erlang Network GNSS-SDRLIB v3.x (Community Edition)
+Erlang Network GNSS-SDRLIB v3.0 (Community Edition)
 ===============================================================================
 An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
@@ -15,6 +15,7 @@ HP: <http://www.taroz.net>
 Shu Wang  (Erlang Network)
 Email: shu@erlangnetwork.com
 Blog: https://blog.erlangnetwork.com
+Wechat: run4life2
 
 Features
 -------------------------------------------------------------------------------
