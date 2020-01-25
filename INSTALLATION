@@ -6,7 +6,7 @@ $ sudo apt install build-essential cmake git
 $ git clone --recursive https://github.com/erlangnetwork/erlangnetwork-gnss-sdrlib
 $ cd ./erlangnetwork-gnss-sdrlib
 
-** Install KA9Q FEC library https://github.com/Opendigitalradio/ka9q-fec.git
+** Install KA9Q FEC library
 $ cd ./lib/ka9q-fec/
 $ mkdir build && cd build && cmake ..
 $ make && sudo make install && sudo ldconfig
