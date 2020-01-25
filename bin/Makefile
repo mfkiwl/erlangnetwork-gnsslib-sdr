@@ -14,30 +14,42 @@ STEREO=../src/rcv/stereo
 RTLSDR=../src/rcv/rtlsdr
 BLADERF=../src/rcv/bladerf
 
-INCLUDE=-I$(SRC) -I$(RTKLIB) -I$(FEC) -I$(STEREO) -I$(RTLSDR) -I$(BLADERF)
+INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
-CC=gcc
-OPTIONS=-DSSE2_ENABLE -DFFTMTX -DSTEREO -DSTEREOV26
+CC = gcc
+OPTIONS = -DSSE2_ENABLE -DFFTMTX
 
 OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
      sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
      sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o sdrlex.o\
-     sdrsync.o stereo.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
+     sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
+
+ifeq ($(USE_STEREO),1)
+STEREO=../hardware/stereo
+OPTIONS+= -DSTEREO -DSTEREOV26
+INCLUDE+= -I$(STEREO)
+#LIBS+=$(STEREO)/linux/libnslstereo.a
+OBS+=stereo.o
+endif
 
 ifeq ($(USE_RTLSDR),1)
-OPTIONS+=-DRTLSDR
-LIBS+=-lrtlsdr
-OBS+=rtlsdr.o convenience.o
+#RTLSDR=../src/rcv/rtlsdr
+LIBS = -lrtlsdr
+OPTIONS += -DRTLSDR -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+INCLUDE += -I$(RTLSDR)
+OBS += rtlsdr.o convenience.o
 endif
+
 
 ifeq ($(USE_BLADERF),1)
 OPTIONS+=-DBLADERF
 LIBS+=-lbladeRF
+INCLUDE += -I$(BLADERF)
 OBS+=bladerf.o
 endif
 
-CFLAGS=-Wall -O3 -march=native $(INCLUDE) $(OPTIONS) -g
-LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0
+CFLAGS=-Wall -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
+LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
 
 BIN= gnss-sdrcli
 $(BIN): $(OBS)
