@@ -17,7 +17,7 @@ BLADERF=../src/rcv/bladerf
 INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
 CC = gcc
-OPTIONS = -DSSE2_ENABLE -DFFTMTX
+OPTIONS = -DFFTMTX
 
 OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
      sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\

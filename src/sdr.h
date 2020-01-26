@@ -18,17 +18,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-/* SIMD (SSE2_ENABLE) */
-#if defined(SSE2_ENABLE)
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#endif
-
-/* SIMD (AVX_ENABLE/AVX2_ENABLE) */
-#if defined(AVX_ENABLE)||defined(AVX2_ENABLE)
-#include <immintrin.h>
-#endif
-
 /* for windows ---------------------------------------------------------------*/
 #ifdef WIN32
 
