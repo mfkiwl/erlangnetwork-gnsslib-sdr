@@ -27,7 +27,7 @@ INCLUDE += -I$(RTLSDR)
 OBS += rtlsdr.o convenience.o
 
 CFLAGS=-Wall $(INCLUDE) $(OPTIONS) -g
-LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
+LDLIBS=-lm -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
 
 BIN= gnss-sdrcli
 $(BIN): $(OBS)
