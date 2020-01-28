@@ -265,7 +265,7 @@ extern void *sdrthread(void *arg)
             acqpower=(double*)calloc(sizeof(double),sdr->nsamp*sdr->acq.nfreq);
 
             /* fft correlation */
-            buffloc=sdraccuisition(sdr,acqpower);
+            buffloc=sdracquisition(sdr,acqpower);
 
             /* plot aquisition result */
             if (sdr->flagacq&&sdrini.pltacq) {
