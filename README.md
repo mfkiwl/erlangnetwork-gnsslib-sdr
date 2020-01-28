@@ -50,7 +50,7 @@ Directory and Files
         ./gnss-sdrcli.exe   Real-time GNSS signal processing AP (CLI)  
         ./gnss-sdrcli.ini   Configuration file for CLI AP  
         ./Makefile          Makefile
-    ./frontend              Directory of front-end configuration files  
+    ./config                Directory of front-end configuration files  
     ./src                   Library source codes  
         ./sdr.h             Library header file  
         ./sdracq.c          Functions related to signal acquisition  
