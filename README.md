@@ -4,7 +4,7 @@ An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
 System Requirements
 -------------------------------------------------------------------------------
-* Erlang Network GNSS-SDRLIB works on various Debian based Linux distributions.
+* Erlang Network GNSS-SDRLIB works on both various Debian based Linux distributions and macOS.
 
 Authors
 -------------------------------------------------------------------------------
@@ -47,8 +47,9 @@ Features
 Directory and Files
 -------------------------------------------------------------------------------
     ./bin                   Executable APs for Windows  
-        ./gnss-sdrcli.exe   Real-time GNSS signal processing AP (CLI)  
-        ./gnss-sdrcli.ini   Configuration file for CLI AP  
+        ./erlang-gnss       Real-time Erlang Network GNSS signal processing executable 
+        ./gnss-sdrcli.ini   Configuration file for Erlang Network GNSS Applications
+        ./gnss_L1CA_12.ini  Configuration file for Erlang Network GNSS Applications
         ./Makefile          Makefile
     ./config                Directory of front-end configuration files  
     ./src                   Library source codes  
@@ -58,7 +59,7 @@ Directory and Files
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
         ./sdrlex.c          Functions related to QZSS LEX decoding  
-        ./sdrmain.c         Main function  
+        ./main.c            Main function  
         ./sdrnav.c          Functions related to navigation data  
         ./sdrnav_gps.c      Functions related to decoding GPS nav. data  
         ./sdrnav_glo.c      Functions related to decoding GLONASS nav. data  
