@@ -11,7 +11,7 @@
 *          double *power    O   normalized correlation power vector (2D array)
 * return : uint64_t             current buffer location
 *-----------------------------------------------------------------------------*/
-extern uint64_t sdraccuisition(sdrch_t *sdr, double *power)
+extern uint64_t sdracquisition(sdrch_t *sdr, double *power)
 {
     int i;
     char *data;
