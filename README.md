@@ -4,7 +4,7 @@ An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
 System Requirements
 -------------------------------------------------------------------------------
-* Erlang Network GNSS-SDRLIB works on both various Debian based Linux distributions and macOS.
+* Erlang Network GNSS-SDRLIB works on both macOS and various Debian based Linux distributions.
 
 Authors
 -------------------------------------------------------------------------------
