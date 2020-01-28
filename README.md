@@ -72,7 +72,6 @@ Directory and Files
         ./sdrsync.c         Functions related to generating observation data  
         ./sdrtrk.c          Functions related to signal tracking  
         ./rcv               Source codes related to front-end  
-            ./rtl-sdr       Source codes from Osmocom Opensource Project
     ./lib                   Source codes related to used library  
         ./RTKLIB            Source codes of Tomoji Takasu's open source GNSS positionining engine 
         ./k9aq-fec          Source codes of Phil Karn, KA9Q's open source FEC library
