@@ -22,7 +22,7 @@ OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
      sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
 
 LIBS = -lrtlsdr
-OPTIONS += -DRTLSDR -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+OPTIONS += -DRTLSDR
 INCLUDE += -I$(RTLSDR)
 OBS += rtlsdr.o convenience.o
 
