@@ -1,4 +1,4 @@
-Erlang Network GNSS-SDRLIB v3.0 (Community Edition)
+Erlang Network GNSS-SDRLIB v4.0 (Community Edition)
 ===============================================================================
 An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
@@ -84,4 +84,4 @@ Directory and Files
 
 License
 -------------------------------------------------------------------------------
-See LICENSE file
+See LICENSE file. Private Uses are permitted but commercial uses are restricted.
