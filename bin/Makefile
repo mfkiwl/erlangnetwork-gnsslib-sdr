@@ -32,7 +32,7 @@ LDLIBS=-lm -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec
 BIN= gnss-sdrcli
 $(BIN): $(OBS)
 	 $(CC) -o $(BIN) $(OBS) $(CFLAGS) $(LDLIBS)
-	 @cp $(BIN) ../bin
+	 @cp $(BIN) ../test
 
 sdrmain.o: $(SRC)/sdrmain.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrmain.c
