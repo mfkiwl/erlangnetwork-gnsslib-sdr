@@ -1,30 +1,45 @@
 ** Install regular building tools if you haven't done so.
-$ sudo apt update && sudo apt upgrade 
-$ sudo apt install build-essential cmake git 
 
-** Clone the source codes from https://github.com/erlangnetwork/erlangnetwork-gnss-sdrlib.git
-$ git clone --recursive https://github.com/erlangnetwork/erlangnetwork-gnss-sdrlib
+$ sudo apt update && sudo apt upgrade && sudo apt install build-essential cmake git
+
+** Clone the source codes
+
+$ git clone --recursive --single-branch --branch creativecommons https://github.com/erlangnetwork/erlangnetwork-gnss-sdrlib
+
 $ cd ./erlangnetwork-gnss-sdrlib
 
 ** Install KA9Q FEC library
+
 $ cd ./lib/ka9q-fec/
-$ mkdir build && cd build && cmake ..
-$ make && sudo make install && sudo ldconfig
+
+$ mkdir build && cd build && cmake ../ && make && sudo make install && sudo ldconfig
 
 ** Install RTL-SDR library
-$ cd ./src/rcv/rtl-sdr/
-$ mkdir build && cd build && cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+
+$ cd ../../src/rcv/rtl-sdr/ && mkdir build && cd build && cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+
 $ make && sudo make install && sudo ldconfig
 
 ** Install FFTW from http://www.fftw.org/download.html
+
 In some cases, you need to build three times possibly as instructed below.
 
+$ cd ../../../lib/fftw3/
+
 $ ./configure --enable-threads --enable-shared
+
 $ make && sudo make install
+
 $ ./configure --enable-threads --enable-shared --enable-float
+
 $ make && sudo make install
+
 $ ./configure --enable-threads --enable-shared --enable-long-double
+
 $ make && sudo make install
 
 ** Return back to the bin directory of erlangnetwork-gnss-sdrlib, compile and run
-$ make clean && make && ./gnss-sdrlib
+
+$ cd ../../bin/
+
+$ make clean && make && ./erlang-gnss gnss-sdrcli.ini
