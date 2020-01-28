@@ -5,14 +5,11 @@
 # Use or not use RTLSDR and BLADERF
 # 1:Use 0:Not Use
 USE_RTLSDR=1
-USE_BLADERF=0
 
 SRC=../src
 RTKLIB=../lib/RTKLIB
 FEC=../lib/ka9q-fec
-STEREO=../src/rcv/stereo
 RTLSDR=../src/rcv/rtlsdr
-BLADERF=../src/rcv/bladerf
 
 INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
@@ -24,29 +21,10 @@ OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
      sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o sdrlex.o\
      sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
 
-ifeq ($(USE_STEREO),1)
-STEREO=../hardware/stereo
-OPTIONS+= -DSTEREO -DSTEREOV26
-INCLUDE+= -I$(STEREO)
-#LIBS+=$(STEREO)/linux/libnslstereo.a
-OBS+=stereo.o
-endif
-
-ifeq ($(USE_RTLSDR),1)
-#RTLSDR=../src/rcv/rtlsdr
 LIBS = -lrtlsdr
 OPTIONS += -DRTLSDR -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
 INCLUDE += -I$(RTLSDR)
 OBS += rtlsdr.o convenience.o
-endif
-
-
-ifeq ($(USE_BLADERF),1)
-OPTIONS+=-DBLADERF
-LIBS+=-lbladeRF
-INCLUDE += -I$(BLADERF)
-OBS+=bladerf.o
-endif
 
 CFLAGS=-Wall $(INCLUDE) $(OPTIONS) -g
 LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
@@ -54,7 +32,7 @@ LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec
 BIN= gnss-sdrcli
 $(BIN): $(OBS)
 	 $(CC) -o $(BIN) $(OBS) $(CFLAGS) $(LDLIBS)
-	 @cp $(BIN) ../../bin
+	 @cp $(BIN) ../bin
 
 sdrmain.o: $(SRC)/sdrmain.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrmain.c
