@@ -109,9 +109,11 @@ void *lexthread(void * arg)
     FILE *fplexlog=NULL,*fplexbin=NULL;
     short *rcode;
     cpx_t *xcode;
+    char filename[128];
 
     if (sdrini.log) {
-        fplexlog=fopen("LEXLOG.csv","w");
+        sprintf( filename, "%s/LEXLOG.csv", sdrini.logpath );
+        fplexlog=fopen( filename, "w" );
         fplexbin=fopen("LEXBIN.bin","wb");
         fprintf(fplexlog,"Tow,CN0,Time(ms),Error\n");
     }

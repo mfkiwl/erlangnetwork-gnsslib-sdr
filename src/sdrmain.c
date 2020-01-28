@@ -81,12 +81,23 @@ extern void *keythread(void * arg)
 * return : none
 * note : This function is only used in CLI application 
 *-----------------------------------------------------------------------------*/
-int main(int argc, char **argv)
+int main( int argc, char **argv )
 {
-    /* read ini file */
-    if (readinifile(&sdrini)<0) {
-        return -1; 
+    if( argc < 2 ){
+        char inifilename[] = "./gnss-sdrcli.ini";
+        /* read ini file */
+        if (readinifile( &sdrini, inifilename )<0) {
+            return -1; 
+        }
+
+    }else{
+
+        if( readinifile( &sdrini, argv[1] )<0) {
+            return -1; 
+        }
+
     }
+    
     cratethread(hkeythread,keythread,NULL);
 
     startsdr();
@@ -108,7 +119,7 @@ extern void startsdr(void) /* call as function */
 #endif
 {
     int i;
-    SDRPRINTF("GNSS-SDRLIB start!\n");
+    SDRPRINTF("ERLANG NETWORK gnss-sdrlib start!\n");
 
     /* check initial value */
     if (chk_initvalue(&sdrini)<0) {
@@ -159,6 +170,7 @@ extern void startsdr(void) /* call as function */
                sdrini.f_cf[0],sdrini.f_sf[0],sdrini.f_if[0],&sdrch[sdrini.nch]);
             cratethread(sdrch[sdrini.nch].hsdr,sdrthread,&sdrch[sdrini.nch]);
         }
+        //SDRPRINTF("initialize %s receiption!\n", sdrch[i].satstr );
     }
 #ifndef GUI
     /* sdr spectrum analyzer */
@@ -172,6 +184,7 @@ extern void startsdr(void) /* call as function */
 #endif
 
     /* start grabber */
+    SDRPRINTF("start receiver hardware!\n");
     if (rcvgrabstart(&sdrini)<0) {
         quitsdr(&sdrini,4);
         return;
@@ -192,7 +205,7 @@ extern void startsdr(void) /* call as function */
     /* sdr termination */
     quitsdr(&sdrini,0);
 
-    SDRPRINTF("GNSS-SDRLIB is finished!\n");
+    SDRPRINTF("ERLANG NETWORK gnss-sdrlib is finished!\n");
 }
 /* sdr termination -------------------------------------------------------------
 * sdr termination process  
@@ -243,7 +256,7 @@ extern void *sdrthread(void *arg)
     
     /* create tracking log file */
     if (sdrini.log) {
-        sprintf(fname,"log%s.csv",sdr->satstr);
+        sprintf(fname,"%s/log%s.csv", sdrini.logpath, sdr->satstr);
         if((fp=createlog(fname,&sdr->trk))==NULL) {
             SDRPRINTF("error: invailed log file: %s\n",fname);
             return THRETVAL;

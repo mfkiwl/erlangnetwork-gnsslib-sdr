@@ -48,7 +48,7 @@ INCLUDE += -I$(BLADERF)
 OBS+=bladerf.o
 endif
 
-CFLAGS=-Wall -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
+CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
 LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
 
 BIN= gnss-sdrcli

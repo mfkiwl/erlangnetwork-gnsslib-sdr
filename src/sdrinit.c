@@ -103,15 +103,14 @@ void readinistr(char *file, char *sec, char *key, char *out)
 * return : int                  0:okay -1:error
 * note : this function is only used in CLI application
 *-----------------------------------------------------------------------------*/
-extern int readinifile(sdrini_t *ini)
+extern int readinifile( sdrini_t *ini, const char *inifile )
 {
     int i,ret;
-    char inifile[]="./gnss-sdrcli.ini";
     char fendfile[256],str[256];
 
     /* check ini file */
     if ((ret=GetFileAttributes(inifile))<0){
-        SDRPRINTF("error: gnss-sdrcli.ini doesn't exist\n");
+        SDRPRINTF("error: %s doesn't exist\n", inifile );
         return -1;
     }
     /* receiver setting */
@@ -194,6 +193,7 @@ extern int readinifile(sdrini_t *ini)
     ini->sbas    =readiniint(inifile,"OUTPUT","SBAS");
     ini->log     =readiniint(inifile,"OUTPUT","LOG");
     readinistr(inifile,"OUTPUT","RINEXPATH",ini->rinexpath);
+    readinistr(inifile,"OUTPUT","LOGPATH",ini->logpath);        /* Added by Shu Wang, shuwang1@outlook.com, January 28, 2020*/
     ini->rtcmport=readiniint(inifile,"OUTPUT","RTCMPORT");
     ini->lexport =readiniint(inifile,"OUTPUT","LEXPORT");
     ini->sbasport=readiniint(inifile,"OUTPUT","SBASPORT");
@@ -678,7 +678,7 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
     sdr->ti=1/f_sf;
     
     /* code generation */
-    if (!(sdr->code=gencode(prn,ctype,&sdr->clen,&sdr->crate))) {
+    if (!(sdr->code=gencode( prn, ctype, &sdr->clen, &sdr->crate ))) {
         SDRPRINTF("error: gencode\n"); return -1;
     }
     sdr->ci=sdr->ti*sdr->crate;

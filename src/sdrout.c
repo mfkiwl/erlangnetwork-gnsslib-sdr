@@ -37,10 +37,10 @@ extern void createrinexopt(rnxopt_t *opt)
     /* rinex setting */
     opt->rnxver=3.02;
     opt->navsys =SYS_ALL;
-    strcpy(opt->prog,"GNSS-SDRLIB v1.1");
-    strcpy(opt->rec[0],"GNSS-SDRLIB");
-    strcpy(opt->rec[1],"GNSS-SDRLIB");
-    strcpy(opt->rec[2],"1.1");
+    strcpy(opt->prog,"ERLANG-NETWORK v3.0");
+    strcpy(opt->rec[0],"ERLANG-NETWORK");
+    strcpy(opt->rec[1],"ERLANG-NETWORK");
+    strcpy(opt->rec[2],"3.0");
 
     /* signal type (L1 only) */
     for (i=0;i<6;i++) {
@@ -94,9 +94,14 @@ extern int createrinexobs(char *file, rnxopt_t *opt)
     /* UTC time */
     timer=time(NULL);
     utc=gmtime(&timer);
-    sprintf(file,"%s/sdr_%04d%02d%02d%02d%02d%02d.obs",sdrini.rinexpath,
-        utc->tm_year+1900,utc->tm_mon+1,utc->tm_mday,
-        utc->tm_hour,utc->tm_min,utc->tm_sec);
+    sprintf(file,"%s/sdr_%04d%02d%02d%02d%02d%02d.obs",
+        sdrini.rinexpath,
+        utc->tm_year+1900,
+        utc->tm_mon+1,
+        utc->tm_mday,
+        utc->tm_hour,
+        utc->tm_min,
+        utc->tm_sec );
 
     /* write rinex header */
     if ((fd=fopen(file,"w"))==NULL) {

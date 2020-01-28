@@ -27,7 +27,7 @@ extern "C" {
 #include <stdint.h>
 #include "rtl-sdr_export.h"
 
-/*-GNSS-SDRLIB----------------------------------------------------------------*/
+/*-- ERLANG NETWORK GNSS-SDRLIB ----------------------------------------------*/
 #include "../../../src/sdr.h"
     
 #define RTLSDR_SAMPLE_RATE      2048000

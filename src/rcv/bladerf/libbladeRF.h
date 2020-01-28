@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-/*-GNSS-SDRLIB----------------------------------------------------------------*/
+/*--- ERLANG NETWORK GNSS-SDRLIB ----------------------------------------------*/
 #define BLADERF_DATABUFF_SIZE 32768
 extern int bladerf_init(void);
 extern void bladerf_quit(void);

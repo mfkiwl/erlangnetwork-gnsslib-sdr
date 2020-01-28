@@ -342,6 +342,7 @@ typedef struct {
     int sbas;            /* SBAS/QZSS L1SAIF output flag */
     int log;             /* tracking log output flag */
     char rinexpath[1024];/* rinex output path */
+    char logpath[1024];     /* log output path, Added by Shu Wang, shuwang1@outlook.com on January 28, 2020 */ 
     int rtcmport;        /* rtcm TCP/IP port */
     int lexport;         /* LEX TCP/IP port */
     int sbasport;        /* SBAS/L1-SAIF TCP/IP port */
@@ -668,7 +669,7 @@ extern void setobsdata(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt,
                        sdrtrk_t *trk, int flag);
 
 /* sdrinit.c -----------------------------------------------------------------*/
-extern int readinifile(sdrini_t *ini);
+extern int readinifile( sdrini_t *ini, const char *inifile );  /** Modified by Shu Wang, shuwang1@outlook.com, on January 28, 2020*/
 extern int chk_initvalue(sdrini_t *ini);
 extern void openhandles(void);
 extern void closehandles(void);
