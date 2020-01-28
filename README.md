@@ -5,6 +5,7 @@ An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 System Requirements
 -------------------------------------------------------------------------------
 * Erlang Network GNSS-SDRLIB works on various Debian based Linux distributions.
+* The software package dependancy includes fftw, rtl-sdr, libusb, ka9q-fec, RTKLIB.
 
 Authors
 -------------------------------------------------------------------------------
