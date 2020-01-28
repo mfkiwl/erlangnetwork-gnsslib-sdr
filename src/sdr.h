@@ -210,25 +210,11 @@ extern "C" {
 #define CTYPE_L1CP    2                /* GPS/QZSS L1C Pilot */
 #define CTYPE_L1CD    3                /* GPS/QZSS L1C Data */
 #define CTYPE_L1CO    4                /* GPS/QZSS L1C overlay */
-#define CTYPE_L2CM    5                /* GPS/QZSS L2CM */
-#define CTYPE_L2CL    6                /* GPS/QZSS L2CL */
-#define CTYPE_L5I     7                /* GPS/QZSS L5I */
-#define CTYPE_L5Q     8                /* GPS/QZSS L5Q */
 #define CTYPE_E1B     9                /* Galileo E1B (Data) */
 #define CTYPE_E1C     10               /* Galileo E1C (Pilot) */
-#define CTYPE_E5AI    11               /* Galileo E5aI (Data) */
-#define CTYPE_E5AQ    12               /* Galileo E5aQ (Pilot) */
-#define CTYPE_E5BI    13               /* Galileo E5bI (Data) */
-#define CTYPE_E5BQ    14               /* Galileo E5bQ (Pilot) */
 #define CTYPE_E1CO    15               /* Galileo E1C overlay */
-#define CTYPE_E5AIO   16               /* Galileo E5aI overlay */
-#define CTYPE_E5AQO   17               /* Galileo E5aQ overlay */
-#define CTYPE_E5BIO   18               /* Galileo E5bI overlay */
-#define CTYPE_E5BQO   19               /* Galileo E5bQ overlay */
 #define CTYPE_G1      20               /* GLONASS G1 */
-#define CTYPE_G2      21               /* GLONASS G2 */
 #define CTYPE_B1I     22               /* BeiDou B1I */
-#define CTYPE_B2I     23               /* BeiDou B2I */
 #define CTYPE_LEXS    24               /* QZSS LEX short */
 #define CTYPE_LEXL    25               /* QZSS LEX long */
 #define CTYPE_L1SAIF  26               /* QZSS L1 SAIF */
@@ -654,7 +640,7 @@ extern void *syncthread(void * arg);
 #endif
 
 /* sdracq.c ------------------------------------------------------------------*/
-extern uint64_t sdraccuisition(sdrch_t *sdr, double *power);
+extern uint64_t sdracquisition(sdrch_t *sdr, double *power);
 extern int checkacquisition(double *P, sdrch_t *sdr);
 
 
