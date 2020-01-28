@@ -37,10 +37,10 @@ extern void createrinexopt(rnxopt_t *opt)
     /* rinex setting */
     opt->rnxver=3.02;
     opt->navsys =SYS_ALL;
-    strcpy(opt->prog,"ERLANG-NETWORK v3.0");
+    strcpy(opt->prog,"ERLANG-NETWORK v4.0");
     strcpy(opt->rec[0],"ERLANG-NETWORK");
     strcpy(opt->rec[1],"ERLANG-NETWORK");
-    strcpy(opt->rec[2],"3.0");
+    strcpy(opt->rec[2],"4.0");
 
     /* signal type (L1 only) */
     for (i=0;i<6;i++) {

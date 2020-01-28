@@ -20,7 +20,7 @@ INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
 OPTIONS = -DFFTMTX
 
-OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
+OBS= main.o sdrthread.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
      sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
      sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o sdrlex.o\
      sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
@@ -56,6 +56,7 @@ ifeq ($(UNAME_S),Linux)
 	LDLIBS = -lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
 	BIN = erlang-gnss
 endif
+
 ifeq ($(UNAME_S),Darwin)
 	CC = gcc
 	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
@@ -66,8 +67,10 @@ endif
 $(BIN): $(OBS)
 	 $(CC) -o $(BIN) $(OBS) $(CFLAGS) $(LDLIBS)
 
-sdrmain.o: $(SRC)/sdrmain.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrmain.c
+main.o: $(SRC)/main.c
+	$(CC) -c $(CFLAGS) $(SRC)/main.c
+sdrthread.o : $(SRC)/sdrthread.c
+	$(CC) -c $(CFLAGS) $(SRC)/sdrthread.c
 sdrcmn.o : $(SRC)/sdrcmn.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrcmn.c
 sdracq.o : $(SRC)/sdracq.c
