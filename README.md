@@ -54,12 +54,13 @@ Directory and Files
     ./config                Directory of front-end configuration files  
     ./src                   Library source codes  
         ./sdr.h             Library header file  
-        ./sdracq.c          Functions related to signal acquisition  
+        ./acquisition.c     Functions related to signal acquisition  
         ./sdrcmn.c          Functions related to SIMD operation  
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
         ./sdrlex.c          Functions related to QZSS LEX decoding  
         ./main.c            Main function  
+        ./sdrthread.c
         ./sdrnav.c          Functions related to navigation data  
         ./sdrnav_gps.c      Functions related to decoding GPS nav. data  
         ./sdrnav_glo.c      Functions related to decoding GLONASS nav. data  
