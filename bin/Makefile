@@ -51,10 +51,9 @@ endif
 CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
 LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
 
-BIN= gnss-sdrcli
+BIN= erlang-gnss
 $(BIN): $(OBS)
 	 $(CC) -o $(BIN) $(OBS) $(CFLAGS) $(LDLIBS)
-	 @cp $(BIN) ../../bin
 
 sdrmain.o: $(SRC)/sdrmain.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrmain.c
