@@ -1,6 +1,8 @@
+# \filename Makefile
+# \brief Makefile for Erlang Network GNSS SDRLib
 #
-# makefile for gnss-sdr-cli
-#
+# \author Shu Wang, shuwang1@outlook.com
+
 
 # Use or not use RTLSDR and BLADERF
 # 1:Use 0:Not Use
@@ -16,7 +18,6 @@ BLADERF=../src/rcv/bladerf
 
 INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
-CC = gcc
 OPTIONS = -DFFTMTX
 
 OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
@@ -48,10 +49,20 @@ INCLUDE += -I$(BLADERF)
 OBS+=bladerf.o
 endif
 
-CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
-LDLIBS=-lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CC = gcc
+	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
+	LDLIBS = -lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
+	BIN = erlang-gnss
+endif
+ifeq ($(UNAME_S),Darwin)
+	CC = gcc
+	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
+	LDLIBS = -lm -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
+	BIN = erlang-gnss
+endif
 
-BIN= erlang-gnss
 $(BIN): $(OBS)
 	 $(CC) -o $(BIN) $(OBS) $(CFLAGS) $(LDLIBS)
 
