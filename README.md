@@ -53,8 +53,11 @@ Directory and Files
         ./Makefile          Makefile
     ./config                Directory of front-end configuration files  
     ./src                   Library source codes  
-        ./sdr.h             Library header file  
-        ./acquisition.c     Functions related to signal acquisition  
+        ./measurement_engine.h   GNSS measurement engine library header file  
+        ./acquisition.c     Functions related to signal acquisition
+        ./acquisition_initialization.c
+        ./tracking.c        Functions related to signal tracking
+        ./tracking_initialization.c
         ./sdrcmn.c          Functions related to SIMD operation  
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
@@ -72,7 +75,6 @@ Directory and Files
         ./sdrrcv.c          Functions related to receiving RF data  
         ./sdrspec.c         Functions related to spectrum analysis  
         ./sdrsync.c         Functions related to generating observation data  
-        ./sdrtrk.c          Functions related to signal tracking  
         ./rcv               Source codes related to front-end  
             ./rtl-sdr       Source codes from Osmocom Opensource Project
     ./lib                   Source codes related to used library  
