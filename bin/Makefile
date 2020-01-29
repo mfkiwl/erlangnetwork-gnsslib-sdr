@@ -20,7 +20,7 @@ INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
 OPTIONS = -DFFTMTX
 
-OBS= main.o sdrthread.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
+OBS= main.o statemachine.o sdrcmn.o acquisition.o sdrcode.o sdrinit.o sdrnav.o\
      sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
      sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o sdrlex.o\
      sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
@@ -69,12 +69,12 @@ $(BIN): $(OBS)
 
 main.o: $(SRC)/main.c
 	$(CC) -c $(CFLAGS) $(SRC)/main.c
-sdrthread.o : $(SRC)/sdrthread.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrthread.c
+statemachine.o : $(SRC)/statemachine.c
+	$(CC) -c $(CFLAGS) $(SRC)/statemachine.c
 sdrcmn.o : $(SRC)/sdrcmn.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrcmn.c
-sdracq.o : $(SRC)/sdracq.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdracq.c
+acquisition.o : $(SRC)/acquisition.c
+	$(CC) -c $(CFLAGS) $(SRC)/acquisition.c
 sdrcode.o: $(SRC)/sdrcode.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrcode.c
 sdrinit.o: $(SRC)/sdrinit.c
@@ -126,9 +126,10 @@ convenience.o : $(RTLSDR)/convenience.c
 bladerf.o : $(BLADERF)/bladerf.c
 	$(CC) -c $(CFLAGS) $(BLADERF)/bladerf.c
 
-sdrmain.o: $(SRC)/sdr.h
+main.o: $(SRC)/sdr.h
+statemachine.o: $(SRC)/sdr.h
 sdrcmn.o : $(SRC)/sdr.h
-sdracq.o : $(SRC)/sdr.h
+acquisition.o : $(SRC)/sdr.h
 sdrcode.o: $(SRC)/sdr.h
 sdrinit.o: $(SRC)/sdr.h
 sdrout.o : $(SRC)/sdr.h

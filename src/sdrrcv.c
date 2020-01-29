@@ -157,7 +157,7 @@ extern int rcvinit(sdrini_t *ini)
 #ifdef RTLSDR
     /* RTL-SDR */
     case FEND_RTLSDR:
-        if (rtlsdr_init()<0) return -1; /* rtlsdr initialization */
+        if (rtlsdr_init( ini->f_cf[0]/1000, ini->f_sf[0] )<0) return -1; /* rtlsdr initialization */
 
         /* frontend buffer size */
         sdrstat.fendbuffsize=RTLSDR_DATABUFF_SIZE; /* frontend buff size */

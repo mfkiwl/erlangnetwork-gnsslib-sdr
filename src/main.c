@@ -136,7 +136,8 @@ extern void startsdr(void) /* call as function */
     }
     /* initialize sdr channel struct */
     for (i=0;i<sdrini.nch;i++) {
-        if (initsdrch(i+1,sdrini.sys[i],sdrini.prn[i],sdrini.ctype[i],
+
+        if (initsdrch(i+1,sdrini.sys[i], sdrini.prn[i],sdrini.ctype[i],
             sdrini.dtype[sdrini.ftype[i]-1],sdrini.ftype[i],
             sdrini.f_cf[sdrini.ftype[i]-1],sdrini.f_sf[sdrini.ftype[i]-1],
             sdrini.f_if[sdrini.ftype[i]-1],&sdrch[i])<0) {
@@ -145,6 +146,7 @@ extern void startsdr(void) /* call as function */
             quitsdr(&sdrini,2);
             return;
         }
+
     }
 
     /* mutexes and events */
@@ -155,22 +157,42 @@ extern void startsdr(void) /* call as function */
 
     /* sdr channel thread */
     for (i=0;i<sdrini.nch;i++) {
-        /* GPS/QZS/GLO/GAL/CMP L1 */
+
+        SDRPRINTF("%s sys=%d prn=%02d ctype=%d dtype=%d ftype=%d f_cf=%.0f f_sf=%.0f f_if=%.0f clen=%d crate=%.0f nsamp=%d\n", 
+            sdrch[i].satstr,
+            sdrch[i].sys,
+            sdrch[i].prn,
+            sdrch[i].ctype,
+            sdrch[i].dtype,
+            sdrch[i].ftype,
+            sdrch[i].f_cf,
+            sdrch[i].f_sf,
+            sdrch[i].f_if,
+            sdrch[i].clen,
+            sdrch[i].crate,
+            sdrch[i].nsamp );
+
         if (sdrch[i].ctype==CTYPE_L1CA  || sdrch[i].ctype==CTYPE_G1  ||
             sdrch[i].ctype==CTYPE_E1B   || sdrch[i].ctype==CTYPE_B1I ||
-            sdrch[i].ctype==CTYPE_L1SBAS|| sdrch[i].ctype==CTYPE_L1SAIF)
-            cratethread(sdrch[i].hsdr,sdrthread,&sdrch[i]);
-        /* QZSS LEX */
-        if (sdrch[i].sys==SYS_QZS&&sdrch[i].ctype==CTYPE_LEXS) {
+            sdrch[i].ctype==CTYPE_L1SBAS|| sdrch[i].ctype==CTYPE_L1SAIF ){   /* GPS/QZS/GLO/GAL/CMP L1 */
+
+            cratethread( sdrch[i].hsdr, sdrthread, &sdrch[i] ) ;
+
+        }else if ( sdrch[i].ctype==CTYPE_L2CM ){   /* GPS L2 */
+            
+            cratethread( sdrch[i].hsdr, sdrthread, &sdrch[i] );
+
+        }else if (sdrch[i].sys==SYS_QZS && sdrch[i].ctype==CTYPE_LEXS) {  /* QZSS LEX */
+
             sdrini.nchL6++;
             cratethread(sdrch[i].hsdr,lexthread,&sdrch[i]);
 
             /* create QZSS L1CA channel */
             initsdrch(sdrini.nch+1,SYS_QZS,193,CTYPE_L1CA,DTYPEI,FTYPE1,
                sdrini.f_cf[0],sdrini.f_sf[0],sdrini.f_if[0],&sdrch[sdrini.nch]);
+
             cratethread(sdrch[sdrini.nch].hsdr,sdrthread,&sdrch[sdrini.nch]);
         }
-        //SDRPRINTF("initialize %s receiption!\n", sdrch[i].satstr );
     }
 #ifndef GUI
     /* sdr spectrum analyzer */

@@ -26,6 +26,7 @@ extern "C" {
 
 #include <stdint.h>
 #include "rtl-sdr_export.h"
+typedef struct rtlsdr_dev rtlsdr_dev_t;
 
 /*-- ERLANG NETWORK GNSS-SDRLIB ----------------------------------------------*/
 #include "../../../src/sdr.h"
@@ -34,16 +35,16 @@ extern "C" {
 #define RTLSDR_FREQUENCY        1575420000
 #define RTLSDR_ASYNC_BUF_NUMBER 32
 #define RTLSDR_DATABUFF_SIZE    16384
-extern int rtlsdr_init(void);
+extern int rtlsdr_init( int carrierfreq_kHz, int samplingfreq_Hz  );
 extern void rtlsdr_quit(void);
-extern int rtlsdr_initconf(void);
+extern int rtlsdr_initconf( int carrierfreq_kHz, int samplingfreq_Hz );
 extern int rtlsdr_start(void);
 extern void rtlsdr_exp(uint8_t *buf, int n, char *expbuf);
 extern void rtlsdr_getbuff(uint64_t buffloc, int n, char *expbuf);
 extern void frtlsdr_pushtomembuf(void);
+extern int rtlsdr_set_bias_tee(rtlsdr_dev_t *dev, int on);
 /*----------------------------------------------------------------------------*/
 
-typedef struct rtlsdr_dev rtlsdr_dev_t;
 
 RTLSDR_API uint32_t rtlsdr_get_device_count(void);
 

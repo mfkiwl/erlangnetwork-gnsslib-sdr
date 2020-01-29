@@ -11,7 +11,7 @@
 *          double *power    O   normalized correlation power vector (2D array)
 * return : uint64_t             current buffer location
 *-----------------------------------------------------------------------------*/
-extern uint64_t sdraccuisition(sdrch_t *sdr, double *power)
+extern uint64_t acquisition(sdrch_t *sdr, double *power)
 {
     int i;
     char *data;
@@ -22,7 +22,7 @@ extern uint64_t sdraccuisition(sdrch_t *sdr, double *power)
 
     /* current buffer location */
     mlock(hreadmtx);
-    buffloc=(sdrstat.fendbuffsize*sdrstat.buffcnt)-(sdr->acq.intg+1)*sdr->nsamp;
+    buffloc = ( sdrstat.fendbuffsize * sdrstat.buffcnt) - (sdr->acq.intg+1)*sdr->nsamp;
     unmlock(hreadmtx);
 
     /* acquisition integration */
@@ -36,8 +36,8 @@ extern uint64_t sdraccuisition(sdrch_t *sdr, double *power)
             sdr->acq.nfreq,sdr->crate,sdr->acq.nfft,sdr->xcode,power);
 
         /* check acquisition result */
-        if (checkacquisition(power,sdr)) {
-            sdr->flagacq=ON;
+        if( checkacquisition( power, sdr ) ) {
+            sdr->flagacq = i + 1;
             break;
         }
     }
@@ -48,15 +48,13 @@ extern uint64_t sdraccuisition(sdrch_t *sdr, double *power)
         sdr->acq.acqfreq-sdr->f_if-sdr->foffset);
 
     /* set acquisition result */
-    if (sdr->flagacq) {
+    if( sdr->flagacq > 0 ) {
         /* set buffer location at top of code */
         buffloc+=-(i+1)*sdr->nsamp+sdr->acq.acqcodei;
         sdr->trk.carrfreq=sdr->acq.acqfreq;
         sdr->trk.codefreq=sdr->crate;
     }
-    else {
-        sleepms(ACQSLEEP);
-    }
+
     sdrfree(data);
     return buffloc;
 }

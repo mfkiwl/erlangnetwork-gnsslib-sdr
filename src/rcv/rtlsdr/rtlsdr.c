@@ -2,6 +2,7 @@
 * rtlsdr.c : Realtek RTL2832 based DVB dongle functions
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
+* Copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
 *-----------------------------------------------------------------------------*/
 #include "../../../src/sdr.h"
 
@@ -29,7 +30,7 @@ void stream_callback_rtlsdr(unsigned char *buf, uint32_t len, void *ctx)
 * args   : none
 * return : int                  status 0:okay -1:failure
 *-----------------------------------------------------------------------------*/
-extern int rtlsdr_init(void) 
+extern int rtlsdr_init( int carrierfreq_kHz, int samplingfreq_Hz ) 
 {
     int ret,dev_index=0;;
 
@@ -42,10 +43,18 @@ extern int rtlsdr_init(void)
     }
 
     /* set configuration */
-    ret=rtlsdr_initconf();
+    ret=rtlsdr_initconf( carrierfreq_kHz, samplingfreq_Hz );
     if (ret<0) {
         SDRPRINTF("error: failed to initialize rtlsdr\n");
         return -1;
+    }
+
+    ret = rtlsdr_set_gpio( dev, 0, 1 );
+    //ret = rtlsdr_set_bias_tee( &dev, 1 );
+    if (ret<0) {
+        SDRPRINTF("error: failed to set the base T\n");
+    }else{
+        SDRPRINTF("The base T of the RTL-SDR device is set.\n");
     }
 
     return 0;
@@ -65,19 +74,19 @@ extern void rtlsdr_quit(void)
 * args   : none
 * return : int                  status 0:okay -1:failure
 *-----------------------------------------------------------------------------*/
-extern int rtlsdr_initconf(void) 
+extern int rtlsdr_initconf( int carrierfreq_kHz, int samplingfreq_Hz ) 
 {
     int ret;
     
     /* Set the sample rate */
-    ret=verbose_set_sample_rate(dev,RTLSDR_SAMPLE_RATE);
+    ret=verbose_set_sample_rate( dev, samplingfreq_Hz );
     if (ret<0) {
         SDRPRINTF("error: failed to set samplerate\n");
         return -1;
     }
 
     /* Set the frequency */
-    ret=verbose_set_frequency(dev,RTLSDR_FREQUENCY);
+    ret=verbose_set_frequency( dev, carrierfreq_kHz * 1000 );
     if (ret<0) {
         SDRPRINTF("error: failed to set frequency\n");
         return -1;
@@ -189,4 +198,19 @@ extern void frtlsdr_pushtomembuf(void)
     mlock(hreadmtx);
     sdrstat.buffcnt++;
     unmlock(hreadmtx);
+}
+
+/**
+ * Added by Shu Wang on Januuary 27, 2020
+ ***/
+
+extern int rtlsdr_set_bias_tee( rtlsdr_dev_t *dev, int on)
+{
+	if (!dev)
+		return -1;
+
+	rtlsdr_set_gpio_output( dev, 0 );
+	rtlsdr_set_gpio_bit( dev, 0, on );
+
+	return 0;
 }

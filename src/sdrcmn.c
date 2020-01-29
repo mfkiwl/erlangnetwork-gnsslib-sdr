@@ -694,10 +694,18 @@ extern void correlator(const char *data, int dtype, double ti, int n,
     int smax=s[ns-1];
 
     /* 8 is treatment of remainder in SSE2 */
-    if (!(dataI=(short *)sdrmalloc(sizeof(short)*(n+64)))|| 
-        !(dataQ=(short *)sdrmalloc(sizeof(short)*(n+64)))|| 
-        !(code_e=(short *)sdrmalloc(sizeof(short)*(n+2*smax)))) {
-            SDRPRINTF("error: correlator memory allocation\n");
+    if( !( dataI = (short *) sdrmalloc(sizeof(short)*(n+64)) ) ) {
+            SDRPRINTF("error: correlator dataI memory allocation\n");
+            return;
+    }
+
+    if( !( dataQ = (short *) sdrmalloc(sizeof(short)*(n+64)) ) ) {
+            SDRPRINTF("error: correlator dataQ memory allocation\n");
+            return;
+    }
+
+    if( !( code_e = (short *) sdrmalloc(sizeof(short)*(n+2*smax)) ) ) {
+            SDRPRINTF("error: correlator code_e memory allocation\n");
             return;
     }
     code=code_e+smax;

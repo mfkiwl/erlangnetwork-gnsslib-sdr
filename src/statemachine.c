@@ -1,8 +1,9 @@
-/*------------------------------------------------------------------------------
-* sdrmain.c : SDR main functions
-*
-* Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
-*-----------------------------------------------------------------------------*/
+/**
+ * \file sdrthread.c
+ * \brief statemachine for each satellite under acquisition and tracking
+ *
+ * Copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
+ ***/
 #include "sdr.h"
 
 /* sdr channel thread ----------------------------------------------------------
@@ -12,6 +13,8 @@
 * note : This thread handles the acquisition and tracking of one of the signals. 
 *        The thread is created at startsdr function.
 *-----------------------------------------------------------------------------*/
+#define ACQSLEEP      2000             /* acquisition process interval (ms) */
+
 #ifdef WIN32
 extern void sdrthread(void *arg)
 #else
@@ -41,24 +44,43 @@ extern void *sdrthread(void *arg)
     sleepms(sdr->no*500);
     SDRPRINTF("**** %s sdr thread %d start! ****\n",sdr->satstr,sdr->no);
 
+    sdr->flagacq = 0 ;
     while (!sdrstat.stopflag) {
+
         /* acquisition */
-        if (!sdr->flagacq) {
+        if( sdr->flagacq < 1 ) {
+
             /* memory allocation */
-            if (acqpower!=NULL) free(acqpower);
-            acqpower=(double*)calloc(sizeof(double),sdr->nsamp*sdr->acq.nfreq);
+            acqpower = (double*) calloc( sizeof(double), sdr->nsamp * sdr->acq.nfreq );
 
             /* fft correlation */
-            buffloc=sdraccuisition(sdr,acqpower);
+            buffloc = acquisition( sdr, acqpower );
 
-            /* plot aquisition result */
-            if (sdr->flagacq&&sdrini.pltacq) {
-                pltacq.z=acqpower;
-                plot(&pltacq); 
+            if( acqpower!=NULL ){
+                free( acqpower );
+                acqpower == NULL;
             }
+        
         }
+
+        if( sdr->flagacq > 0 ) {
+
+            if( sdrini.pltacq ) { /* plot aquisition result */
+
+                pltacq.z = acqpower;
+                plot( &pltacq ); 
+
+            }
+
+        }else{
+
+            sdr->flagacq = sdr->flagacq > -3 ? -10 : ++(sdr->flagacq) ;
+            sleepms( - sdr->flagacq * ACQSLEEP );
+        
+        }
+
         /* tracking */
-        if (sdr->flagacq) {
+        if( sdr->flagacq > 0 ) {
             bufflocnow=sdrtracking(sdr,buffloc,cnt);
             if (sdr->flagtrk) {
                 

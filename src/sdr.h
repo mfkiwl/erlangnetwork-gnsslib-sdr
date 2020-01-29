@@ -146,7 +146,6 @@ extern "C" {
 #define ACQHBAND      7000             /* half width for doppler search (Hz) */
 #define ACQSTEP       200              /* doppler search frequency step (Hz) */
 #define ACQTH         3.0              /* acquisition threshold (peak ratio) */
-#define ACQSLEEP      2000             /* acquisition process interval (ms) */
 
 /* tracking setting */
 #define LOOP_L1CA     10               /* loop interval */
@@ -655,7 +654,7 @@ extern void *syncthread(void * arg);
 #endif
 
 /* sdracq.c ------------------------------------------------------------------*/
-extern uint64_t sdraccuisition(sdrch_t *sdr, double *power);
+extern uint64_t acquisition(sdrch_t *sdr, double *power);
 extern int checkacquisition(double *P, sdrch_t *sdr);
 
 

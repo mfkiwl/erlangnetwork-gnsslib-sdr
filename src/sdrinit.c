@@ -682,8 +682,8 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
         SDRPRINTF("error: gencode\n"); return -1;
     }
     sdr->ci=sdr->ti*sdr->crate;
-    sdr->ctime=sdr->clen/sdr->crate;
-    sdr->nsamp=(int)(f_sf*sdr->ctime);
+    sdr->ctime = sdr->clen/sdr->crate;
+    sdr->nsamp = (int) (f_sf * sdr->ctime );
     sdr->nsampchip=(int)(sdr->nsamp/sdr->clen);
     satno2id(sdr->sat,sdr->satstr);
 
