@@ -46,7 +46,7 @@ Features
 Directory and Files
 -------------------------------------------------------------------------------
     ./bin                   Executable APs for Windows  
-        ./gnss-sdrcli.exe   Real-time GNSS signal processing AP (CLI)  
+        ./gnss-sdrcli       Real-time GNSS signal processing AP (CLI)  
         ./gnss-sdrcli.ini   Configuration file for CLI AP  
         ./Makefile          Makefile
     ./frontend              Directory of front-end configuration files  
