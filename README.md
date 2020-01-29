@@ -49,7 +49,7 @@ Directory and Files
     ./bin                   Executable APs for Windows  
         ./erlang-gnss       Real-time Erlang Network GNSS signal processing executable 
         ./gnss-sdrcli.ini   Configuration file for Erlang Network GNSS Applications
-        ./gnss_L1CA_12.ini  Configuration file for Erlang Network GNSS Applications
+        ./gnss_L2CM.ini  Configuration file for Erlang Network GNSS Applications
         ./Makefile          Makefile
     ./config                Directory of front-end configuration files  
     ./src                   Library source codes  
@@ -60,7 +60,7 @@ Directory and Files
         ./sdrinit.c         Functions related to initialization/end process  
         ./sdrlex.c          Functions related to QZSS LEX decoding  
         ./main.c            Main function  
-        ./sdrthread.c
+        ./statemachine.c
         ./sdrnav.c          Functions related to navigation data  
         ./sdrnav_gps.c      Functions related to decoding GPS nav. data  
         ./sdrnav_glo.c      Functions related to decoding GLONASS nav. data  
