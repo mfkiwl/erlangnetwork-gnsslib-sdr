@@ -42,6 +42,7 @@ extern int rtlsdr_start(void);
 extern void rtlsdr_exp(uint8_t *buf, int n, char *expbuf);
 extern void rtlsdr_getbuff(uint64_t buffloc, int n, char *expbuf);
 extern void frtlsdr_pushtomembuf(void);
+//extern int rtlsdr_set_gpio( rtlsdr_dev_t *dev, int gpio_pin, int on);
 extern int rtlsdr_set_bias_tee(rtlsdr_dev_t *dev, int on);
 /*----------------------------------------------------------------------------*/
 

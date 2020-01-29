@@ -13,6 +13,7 @@ SRC=../src
 RTKLIB=../lib/RTKLIB
 FEC=../lib/ka9q-fec
 STEREO=../src/rcv/stereo
+RTL-SDR=../src/rcv/rtl-sdr
 RTLSDR=../src/rcv/rtlsdr
 BLADERF=../src/rcv/bladerf
 
@@ -37,8 +38,8 @@ ifeq ($(USE_RTLSDR),1)
 #RTLSDR=../src/rcv/rtlsdr
 LIBS = -lrtlsdr
 OPTIONS += -DRTLSDR -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
-INCLUDE += -I$(RTLSDR)
-OBS += rtlsdr.o convenience.o
+INCLUDE += -I$(RTLSDR) -I../src/rcv/rtl-sdr/include
+OBS += librtlsdr.o rtlsdr.o convenience.o tuner_e4k.o tuner_fc0012.o tuner_fc0013.o tuner_fc2580.o tuner_r82xx.o
 endif
 
 
@@ -119,6 +120,19 @@ rinex.o    : $(RTKLIB)/src/rinex.c
 	$(CC) -c $(CFLAGS) $(RTKLIB)/src/rinex.c
 stereo.o : $(STEREO)/stereo.c
 	$(CC) -c $(CFLAGS) $(STEREO)/stereo.c
+
+tuner_e4k.o: $(RTL-SDR)/src/tuner_e4k.c
+	$(CC) -c $(CFLAGS) $(RTL-SDR)/src/tuner_e4k.c
+tuner_fc0012.o: $(RTL-SDR)/src/tuner_fc0012.c
+	$(CC) -c $(CFLAGS) $(RTL-SDR)/src/tuner_fc0012.c
+tuner_fc0013.o: $(RTL-SDR)/src/tuner_fc0013.c
+	$(CC) -c $(CFLAGS) $(RTL-SDR)/src/tuner_fc0013.c
+tuner_fc2580.o: $(RTL-SDR)/src/tuner_fc2580.c
+	$(CC) -c $(CFLAGS) $(RTL-SDR)/src/tuner_fc2580.c
+tuner_r82xx.o: $(RTL-SDR)/src/tuner_r82xx.c
+	$(CC) -c $(CFLAGS) $(RTL-SDR)/src/tuner_r82xx.c
+librtlsdr.o : $(RTL-SDR)/src/librtlsdr.c
+	$(CC) -c $(CFLAGS) $(RTL-SDR)/src/librtlsdr.c	
 rtlsdr.o : $(RTLSDR)/rtlsdr.c
 	$(CC) -c $(CFLAGS) $(RTLSDR)/rtlsdr.c
 convenience.o : $(RTLSDR)/convenience.c

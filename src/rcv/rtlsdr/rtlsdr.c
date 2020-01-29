@@ -8,6 +8,17 @@
 
 static rtlsdr_dev_t *dev=NULL;
 
+int rtlsdr_set_gpio(rtlsdr_dev_t *dev, int gpio_pin, int on)
+{
+	if (!dev)
+		return -1;
+
+	rtlsdr_set_gpio_output(dev, gpio_pin);
+	rtlsdr_set_gpio_bit(dev, gpio_pin, on);
+
+	return 1;
+}
+
 /* rtlsdr stream callback  -----------------------------------------------------
 * callback for receiving RF data
 *-----------------------------------------------------------------------------*/
@@ -198,19 +209,4 @@ extern void frtlsdr_pushtomembuf(void)
     mlock(hreadmtx);
     sdrstat.buffcnt++;
     unmlock(hreadmtx);
-}
-
-/**
- * Added by Shu Wang on Januuary 27, 2020
- ***/
-
-extern int rtlsdr_set_bias_tee( rtlsdr_dev_t *dev, int on)
-{
-	if (!dev)
-		return -1;
-
-	rtlsdr_set_gpio_output( dev, 0 );
-	rtlsdr_set_gpio_bit( dev, 0, on );
-
-	return 0;
 }

@@ -3,5 +3,11 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"files.associations": {
+			"sdr.h": "c",
+			"libusb.h": "c"
+		}
+	}
 }

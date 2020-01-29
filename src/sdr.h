@@ -44,7 +44,7 @@
 #include "stereo/stereo.h"
 #include "gn3s/gn3s.h"
 #include "bladerf/libbladeRF.h"
-#include "rtlsdr/rtl-sdr.h"
+#include "../rcv/rtlsdr/rtl-sdr.h"
 
 #if defined(GUI)
 #include "../gui/gnss-sdrgui/maindlg.h"
