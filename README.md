@@ -1,10 +1,10 @@
-Erlang Network GNSS-SDRLIB v4.0 (Community Edition)
+Erlang Network GNSSLib v4.0 (Community Edition)
 ===============================================================================
-An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
+An Open Source GNSS Measurement Engine Software Defined Radio Library Provided by Erlang Network
 
 System Requirements
 -------------------------------------------------------------------------------
-* Erlang Network GNSS-SDRLIB works on both macOS and various Debian based Linux distributions.
+* Erlang Network GNSSLib works on both macOS and various Debian based Linux distributions.
 
 Authors
 -------------------------------------------------------------------------------
