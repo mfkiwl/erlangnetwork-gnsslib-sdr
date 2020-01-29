@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 #define OEMSYNC1   0xAA        /* NovAtel message start sync code 1 */
 #define OEMSYNC2   0x44        /* NovAtel message start sync code 2 */
@@ -94,10 +94,10 @@ void decode_msg_sbas(uint8_t *buff, sdrsbas_t *sbas)
 }
 /* decode SBAS navigation data -------------------------------------------------
 * decode SBAS navigation data and extract message
-* args   : sdrnav_t *nav    I/O sdr navigation struct
+* args   : navigation_t *nav    I/O sdr navigation struct
 * return : int                  word type
 *-----------------------------------------------------------------------------*/
-extern int decode_l1sbas(sdrnav_t *nav)
+extern int decode_l1sbas(navigation_t *nav)
 {
     int i,crc,crcmsg,bits[250];
     uint8_t bin[29]={0},pbin[3];
@@ -113,7 +113,7 @@ extern int decode_l1sbas(sdrnav_t *nav)
     crcmsg=getbitu(pbin,0,24);
     if (crc==crcmsg) {
     } else {
-        SDRPRINTF("error: parity mismatch crc=%d msg=%d\n",crc,crcmsg);
+        debug_print("error: parity mismatch crc=%d msg=%d\n",crc,crcmsg);
     }
 
     /* decode sbas message */

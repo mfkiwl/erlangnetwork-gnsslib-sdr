@@ -19,7 +19,7 @@ BLADERF=../src/rcv/bladerf
 
 INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
-OPTIONS = -DFFTMTX
+OPTIONS = -DFFTMTX -DDEBUG_ENABLED
 
 OBS= main.o statemachine.o sdrcmn.o acquisition.o sdrcode.o sdrinit.o sdrnav.o\
      sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
@@ -140,35 +140,35 @@ convenience.o : $(RTLSDR)/convenience.c
 bladerf.o : $(BLADERF)/bladerf.c
 	$(CC) -c $(CFLAGS) $(BLADERF)/bladerf.c
 
-main.o: $(SRC)/sdr.h
-statemachine.o: $(SRC)/sdr.h
-sdrcmn.o : $(SRC)/sdr.h
-acquisition.o : $(SRC)/sdr.h
-sdrcode.o: $(SRC)/sdr.h
-sdrinit.o: $(SRC)/sdr.h
-sdrout.o : $(SRC)/sdr.h
-sdrnav.o : $(SRC)/sdr.h
-sdrnav_gps.o : $(SRC)/sdr.h
-sdrnav_glo.o : $(SRC)/sdr.h
-sdrnav_gal.o : $(SRC)/sdr.h
-sdrnav_bds.o : $(SRC)/sdr.h
-sdrnav_sbs.o : $(SRC)/sdr.h
-sdrplot.o: $(SRC)/sdr.h
-sdrrcv.o : $(SRC)/sdr.h
-sdrspec.o: $(SRC)/sdr.h
-sdrtrk.o : $(SRC)/sdr.h
-sdrlex.o : $(SRC)/sdr.h
-sdrsync.o: $(SRC)/sdr.h
-rtkcmn.o : $(SRC)/sdr.h
-rtcm.o: $(SRC)/sdr.h
-rtcm2.o : $(SRC)/sdr.h
-rtcm3.o : $(SRC)/sdr.h
-rtcm3e.o: $(SRC)/sdr.h
-rinex.o : $(SRC)/sdr.h
-stereo.o : $(SRC)/sdr.h
-rtlsdr.o : $(SRC)/sdr.h
-convenience.o : $(SRC)/sdr.h
-bladerf.o : $(SRC)/sdr.h
+main.o: $(SRC)/measurement_engine.h
+statemachine.o: $(SRC)/measurement_engine.h
+sdrcmn.o : $(SRC)/measurement_engine.h
+acquisition.o : $(SRC)/measurement_engine.h
+sdrcode.o: $(SRC)/measurement_engine.h
+sdrinit.o: $(SRC)/measurement_engine.h
+sdrout.o : $(SRC)/measurement_engine.h
+sdrnav.o : $(SRC)/measurement_engine.h
+sdrnav_gps.o : $(SRC)/measurement_engine.h
+sdrnav_glo.o : $(SRC)/measurement_engine.h
+sdrnav_gal.o : $(SRC)/measurement_engine.h
+sdrnav_bds.o : $(SRC)/measurement_engine.h
+sdrnav_sbs.o : $(SRC)/measurement_engine.h
+sdrplot.o: $(SRC)/measurement_engine.h
+sdrrcv.o : $(SRC)/measurement_engine.h
+sdrspec.o: $(SRC)/measurement_engine.h
+sdrtrk.o : $(SRC)/measurement_engine.h
+sdrlex.o : $(SRC)/measurement_engine.h
+sdrsync.o: $(SRC)/measurement_engine.h
+rtkcmn.o : $(SRC)/measurement_engine.h
+rtcm.o: $(SRC)/measurement_engine.h
+rtcm2.o : $(SRC)/measurement_engine.h
+rtcm3.o : $(SRC)/measurement_engine.h
+rtcm3e.o: $(SRC)/measurement_engine.h
+rinex.o : $(SRC)/measurement_engine.h
+stereo.o : $(SRC)/measurement_engine.h
+rtlsdr.o : $(SRC)/measurement_engine.h
+convenience.o : $(SRC)/measurement_engine.h
+bladerf.o : $(SRC)/measurement_engine.h
 
 clean:
 	rm -f *.o $(BIN)

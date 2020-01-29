@@ -24,7 +24,7 @@
 #include "config.h"
 #endif
 
-#include "sdr.h"
+#include "measurement_engine.h"
 #include "fusb_win32.h"
 #include <assert.h>
 #include <stdexcept>

@@ -2,8 +2,18 @@
 
 BINDIR = /usr/local/bin
 SRC    = ../../../src
-CFLAGS = -Wall -O3 -ansi -pedantic -I$(SRC) -DTRACE
-LDLIBS  = -lm -lrt
+
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS = -Wall -O3 -ansi -pedantic -I$(SRC) -DTRACE
+	LDLIBS  = -lm -lrt
+endif
+
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS = -Wall -O3 -ansi -pedantic -I$(SRC) -DTRACE
+	LDLIBS  = -lm
+endif
 
 pos2kml    : pos2kml.o convkml.o solution.o geoid.o rtkcmn.o preceph.o
 

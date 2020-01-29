@@ -1,9 +1,11 @@
-/*------------------------------------------------------------------------------
-* sdrmain.c : SDR main functions
-*
-* Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
-*-----------------------------------------------------------------------------*/
-#include "sdr.h"
+/**
+ * \file sdrmain.c
+ * \brief GNSS engines main functions or entrance point
+ * 
+ * \copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
+ * \copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
+ * */
+#include "measurement_engine.h"
 
 /* global variables ----------------------------------------------------------*/
 #ifdef GUI
@@ -68,7 +70,7 @@ extern void *keythread(void * arg)
             sdrstat.stopflag=1;
             break;
         default:
-            SDRPRINTF("press 'q' to exit...\n");
+            debug_print("press 'q' to exit...\n");
             break;
         }
     } while (!sdrstat.stopflag);
@@ -119,18 +121,18 @@ extern void startsdr(void) /* call as function */
 #endif
 {
     int i;
-    SDRPRINTF("ERLANG NETWORK gnss-sdrlib start!\n");
+    debug_print("ERLANG NETWORK gnss-sdrlib start!\n");
 
     /* check initial value */
     if (chk_initvalue(&sdrini)<0) {
-        SDRPRINTF("error: chk_initvalue\n");
+        debug_print("error: chk_initvalue\n");
         quitsdr(&sdrini,1);
         return;
     }
 
     /* receiver initialization */
     if (rcvinit(&sdrini)<0) {
-        SDRPRINTF("error: rcvinit\n");
+        debug_print("error: rcvinit\n");
         quitsdr(&sdrini,1);
         return;
     }
@@ -142,7 +144,7 @@ extern void startsdr(void) /* call as function */
             sdrini.f_cf[sdrini.ftype[i]-1],sdrini.f_sf[sdrini.ftype[i]-1],
             sdrini.f_if[sdrini.ftype[i]-1],&sdrch[i])<0) {
             
-            SDRPRINTF("error: initsdrch\n");
+            debug_print("error: initsdrch\n");
             quitsdr(&sdrini,2);
             return;
         }
@@ -158,7 +160,7 @@ extern void startsdr(void) /* call as function */
     /* sdr channel thread */
     for (i=0;i<sdrini.nch;i++) {
 
-        SDRPRINTF("%s sys=%d prn=%02d ctype=%d dtype=%d ftype=%d f_cf=%.0f f_sf=%.0f f_if=%.0f clen=%d crate=%.0f nsamp=%d\n", 
+        debug_print("%s sys=%d prn=%02d ctype=%d dtype=%d ftype=%d f_cf=%.0f f_sf=%.0f f_if=%.0f clen=%d crate=%.0f nsamp=%d\n", 
             sdrch[i].satstr,
             sdrch[i].sys,
             sdrch[i].prn,
@@ -176,11 +178,11 @@ extern void startsdr(void) /* call as function */
             sdrch[i].ctype==CTYPE_E1B   || sdrch[i].ctype==CTYPE_B1I ||
             sdrch[i].ctype==CTYPE_L1SBAS|| sdrch[i].ctype==CTYPE_L1SAIF ){   /* GPS/QZS/GLO/GAL/CMP L1 */
 
-            cratethread( sdrch[i].hsdr, sdrthread, &sdrch[i] ) ;
+            cratethread( sdrch[i].hsdr, statemachinethread, &sdrch[i] ) ;
 
         }else if ( sdrch[i].ctype==CTYPE_L2CM ){   /* GPS L2 */
             
-            cratethread( sdrch[i].hsdr, sdrthread, &sdrch[i] );
+            cratethread( sdrch[i].hsdr, statemachinethread, &sdrch[i] );
 
         }else if (sdrch[i].sys==SYS_QZS && sdrch[i].ctype==CTYPE_LEXS) {  /* QZSS LEX */
 
@@ -191,7 +193,7 @@ extern void startsdr(void) /* call as function */
             initsdrch(sdrini.nch+1,SYS_QZS,193,CTYPE_L1CA,DTYPEI,FTYPE1,
                sdrini.f_cf[0],sdrini.f_sf[0],sdrini.f_if[0],&sdrch[sdrini.nch]);
 
-            cratethread(sdrch[sdrini.nch].hsdr,sdrthread,&sdrch[sdrini.nch]);
+            cratethread(sdrch[sdrini.nch].hsdr,statemachinethread,&sdrch[sdrini.nch]);
         }
     }
 #ifndef GUI
@@ -206,7 +208,7 @@ extern void startsdr(void) /* call as function */
 #endif
 
     /* start grabber */
-    SDRPRINTF("start receiver hardware!\n");
+    debug_print("start receiver hardware!\n");
     if (rcvgrabstart(&sdrini)<0) {
         quitsdr(&sdrini,4);
         return;
@@ -227,7 +229,7 @@ extern void startsdr(void) /* call as function */
     /* sdr termination */
     quitsdr(&sdrini,0);
 
-    SDRPRINTF("ERLANG NETWORK gnss-sdrlib is finished!\n");
+    debug_print("ERLANG NETWORK gnss-sdrlib is finished!\n");
 }
 /* sdr termination -------------------------------------------------------------
 * sdr termination process  

@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* initialize spectrum analyzer ------------------------------------------------
 * create spectrum analyzer thread
@@ -37,13 +37,13 @@ extern void *specthread(void * arg)
     /* check front end */
     if (sdrini.fend==FEND_FILE) {
         if (spec->ftype==FTYPE2&&(!sdrini.useif2)) {
-            SDRPRINTF("error: spectrum analysis FE2 doesn't exist\n");
+            debug_print("error: spectrum analysis FE2 doesn't exist\n");
             return THRETVAL;
         }
     }
     if (sdrini.fend==FEND_GN3SV2||sdrini.fend==FEND_GN3SV3) {
         if (spec->ftype==FTYPE2) {
-            SDRPRINTF("error: spectrum analysis FE2 doesn't exist\n");
+            debug_print("error: spectrum analysis FE2 doesn't exist\n");
             return THRETVAL;
         }
     }
@@ -55,7 +55,7 @@ extern void *specthread(void * arg)
         !(yI=(double*)malloc(sizeof(double)*SPEC_BITN)) ||
         !(xQ=(double*)malloc(sizeof(double)*SPEC_BITN)) ||
         !(yQ=(double*)malloc(sizeof(double)*SPEC_BITN))) {
-            SDRPRINTF("error: specthread memory allocation\n");
+            debug_print("error: specthread memory allocation\n");
             return THRETVAL;
     }
     /* initiarize plot structs */
@@ -103,7 +103,7 @@ extern void *specthread(void * arg)
     /* free plot structs */
     quitspecpltstruct(spec);
     free(data);
-    SDRPRINTF("spectrum thred is finished!\n");
+    debug_print("spectrum thred is finished!\n");
 
     return THRETVAL;
 }
@@ -243,7 +243,7 @@ extern int spectrumanalyzer(const char *data, int dtype, int n, double f_sf,
         !(s  =(double*)calloc(sizeof(double),nfft*2)) ||
         !(xxx=cpxmalloc(nfft*2)) ||
         !(win=(float*)malloc(sizeof(float)*nwin))) {
-            SDRPRINTF("error: spectrumanalyzer memory allocation\n"); return -1;
+            debug_print("error: spectrumanalyzer memory allocation\n"); return -1;
     }
     /* create hanning window */
     hanning(nwin,win);

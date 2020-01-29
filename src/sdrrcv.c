@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* sdr receiver initialization -------------------------------------------------
 * receiver initialization, memory allocation, file open
@@ -35,7 +35,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
 
@@ -43,17 +43,17 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.tmpbuff=(uint8_t*)malloc(STEREO_PKT_SIZE*STEREO_NUM_BLKS);
         if (NULL==sdrstat.tmpbuff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         if (STEREO_ConnectEndPoint(L1_EP,sdrstat.tmpbuff,
                 STEREO_PKT_SIZE*STEREO_NUM_BLKS)<0) {
-            SDRPRINTF("error: STEREO_ConnectEndPoint\n");
+            debug_print("error: STEREO_ConnectEndPoint\n");
             return -1;
         }
 #else
         if (STEREO_GrabInit()<0) {
-            SDRPRINTF("error: STEREO_GrabInit\n");
+            debug_print("error: STEREO_GrabInit\n");
             return -1;
         }
 #endif /* STEREOV26 */
@@ -62,7 +62,7 @@ extern int rcvinit(sdrini_t *ini)
     case FEND_FSTEREO: 
         /* IF file open */
         if ((ini->fp1 = fopen(ini->file1,"rb"))==NULL){
-            SDRPRINTF("error: failed to open file : %s\n",ini->file1);
+            debug_print("error: failed to open file : %s\n",ini->file1);
             return -1;
         }
         sdrstat.fendbuffsize=STEREO_DATABUFF_SIZE; /* frontend buff size */
@@ -71,7 +71,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -92,7 +92,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -101,7 +101,7 @@ extern int rcvinit(sdrini_t *ini)
     case FEND_FGN3SV3:
         /* IF file open */
         if ((ini->fp1 = fopen(ini->file1,"rb"))==NULL){
-            SDRPRINTF("error: failed to open file : %s\n",ini->file1);
+            debug_print("error: failed to open file : %s\n",ini->file1);
             return -1;
         }
         
@@ -115,7 +115,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -131,7 +131,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -139,7 +139,7 @@ extern int rcvinit(sdrini_t *ini)
     case FEND_FBLADERF:
         /* IF file open */
         if ((ini->fp1 = fopen(ini->file1,"rb"))==NULL){
-            SDRPRINTF("error: failed to open file : %s\n",ini->file1);
+            debug_print("error: failed to open file : %s\n",ini->file1);
             return -1;
         }
 
@@ -149,7 +149,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -166,7 +166,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -174,7 +174,7 @@ extern int rcvinit(sdrini_t *ini)
     case FEND_FRTLSDR:
         /* IF file open */
         if ((ini->fp1 = fopen(ini->file1,"rb"))==NULL){
-            SDRPRINTF("error: failed to open file : %s\n",ini->file1);
+            debug_print("error: failed to open file : %s\n",ini->file1);
             return -1;
         }
 
@@ -185,7 +185,7 @@ extern int rcvinit(sdrini_t *ini)
         /* memory allocation */
         sdrstat.buff=(uint8_t*)malloc(sdrstat.buffsize);
         if (NULL==sdrstat.buff) {
-            SDRPRINTF("error: failed to allocate memory for the buffer\n");
+            debug_print("error: failed to allocate memory for the buffer\n");
             return -1;
         }
         break;
@@ -194,13 +194,13 @@ extern int rcvinit(sdrini_t *ini)
     case FEND_FILE:
         /* IF file open (FILE1) */
         if ((ini->fp1 = fopen(ini->file1,"rb"))==NULL){
-            SDRPRINTF("error: failed to open file(FILE1): %s\n",ini->file1);
+            debug_print("error: failed to open file(FILE1): %s\n",ini->file1);
             return -1;
         }
         /* IF file open (FILE2) */
         if (strlen(ini->file2)!=0) {
             if ((ini->fp2 = fopen(ini->file2,"rb"))==NULL){
-                SDRPRINTF("error: failed to open file(FILE2): %s\n",ini->file2);
+                debug_print("error: failed to open file(FILE2): %s\n",ini->file2);
                 return -1;
             }
         }
@@ -212,14 +212,14 @@ extern int rcvinit(sdrini_t *ini)
         if (ini->fp1!=NULL) {
             sdrstat.buff=(uint8_t*)malloc(ini->dtype[0]*sdrstat.buffsize);
             if (NULL==sdrstat.buff) {
-                SDRPRINTF("error: failed to allocate memory for the buffer\n");
+                debug_print("error: failed to allocate memory for the buffer\n");
                 return -1;
             }
         }
         if (ini->fp2!=NULL) {
             sdrstat.buff2=(uint8_t*)malloc(ini->dtype[1]*sdrstat.buffsize);
             if (NULL==sdrstat.buff2) {
-                SDRPRINTF("error: failed to allocate memory for the buffer\n");
+                debug_print("error: failed to allocate memory for the buffer\n");
                 return -1;
             }
         }
@@ -297,7 +297,7 @@ extern int rcvgrabstart(sdrini_t *ini)
     case FEND_STEREO: 
 #ifndef STEREOV26
         if (STEREO_GrabStart()<0) {
-            SDRPRINTF("error: STEREO_GrabStart\n");
+            debug_print("error: STEREO_GrabStart\n");
             return -1;
         }
 #endif
@@ -323,12 +323,12 @@ extern int rcvgrabdata(sdrini_t *ini)
 #ifdef STEREOV26
         buffcnt=(unsigned int)(sdrstat.buffcnt%MEMBUFFLEN);
         if (STEREO_ReapPacket(L1_EP,buffcnt, 300)<0) {
-            SDRPRINTF("error: STEREO Buffer overrun...\n");
+            debug_print("error: STEREO Buffer overrun...\n");
             return -1;
         }
 #else
         if (STEREO_RefillDataBuffer()<0) {
-            SDRPRINTF("error: STEREO Buffer overrun...\n");
+            debug_print("error: STEREO Buffer overrun...\n");
             return -1;
         }
 #endif
@@ -345,7 +345,7 @@ extern int rcvgrabdata(sdrini_t *ini)
     case FEND_GN3SV2:
     case FEND_GN3SV3:
         if (gn3s_pushtomembuf()<0) {
-            SDRPRINTF("error: GN3S Buffer overrun...\n");
+            debug_print("error: GN3S Buffer overrun...\n");
             return -1;
         }
         break;
@@ -360,7 +360,7 @@ extern int rcvgrabdata(sdrini_t *ini)
     /* Nuand BladeRF */
     case FEND_BLADERF:
         if (bladerf_start()<0) {
-            SDRPRINTF("error: bladeRF...\n");
+            debug_print("error: bladeRF...\n");
             return -1;
         }
         break;
@@ -374,7 +374,7 @@ extern int rcvgrabdata(sdrini_t *ini)
     /* RTL-SDR */
     case FEND_RTLSDR:
         if (rtlsdr_start()<0) {
-            SDRPRINTF("error: rtlsdr...\n");
+            debug_print("error: rtlsdr...\n");
             return -1;
         }
         break;
@@ -486,7 +486,7 @@ extern void file_pushtomembuf(void)
     if ((sdrini.fp1!=NULL&&(int)nread1<sdrini.dtype[0]*FILE_BUFFSIZE)||
         (sdrini.fp2!=NULL&&(int)nread2<sdrini.dtype[1]*FILE_BUFFSIZE)) {
         sdrstat.stopflag=ON;
-        SDRPRINTF("end of file!\n");
+        debug_print("end of file!\n");
     }
 
     mlock(hreadmtx);

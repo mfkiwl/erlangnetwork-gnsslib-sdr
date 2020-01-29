@@ -4,7 +4,7 @@
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 * Copyright (C) 2014 T. Takasu <http://www.rtklib.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 #define CDIV          32               /* carrier lookup table (cycle) */
 #define CMASK         0x1F             /* carrier lookup table mask */
@@ -19,12 +19,12 @@ extern int getfullpath(char *relpath, char *abspath)
 {
 #ifdef WIN32
     if (_fullpath(abspath,relpath,_MAX_PATH)==NULL) {
-        SDRPRINTF("error: getfullpath %s\n",relpath);
+        debug_print("error: getfullpath %s\n",relpath);
         return -1;
     }
 #else
     if (realpath(relpath,abspath)==NULL) {
-        SDRPRINTF("error: getfullpath %s\n",relpath);
+        debug_print("error: getfullpath %s\n",relpath);
         return -1;
     }
 #endif
@@ -695,17 +695,17 @@ extern void correlator(const char *data, int dtype, double ti, int n,
 
     /* 8 is treatment of remainder in SSE2 */
     if( !( dataI = (short *) sdrmalloc(sizeof(short)*(n+64)) ) ) {
-            SDRPRINTF("error: correlator dataI memory allocation\n");
+            debug_print("error: correlator dataI memory allocation\n");
             return;
     }
 
     if( !( dataQ = (short *) sdrmalloc(sizeof(short)*(n+64)) ) ) {
-            SDRPRINTF("error: correlator dataQ memory allocation\n");
+            debug_print("error: correlator dataQ memory allocation\n");
             return;
     }
 
     if( !( code_e = (short *) sdrmalloc(sizeof(short)*(n+2*smax)) ) ) {
-            SDRPRINTF("error: correlator code_e memory allocation\n");
+            debug_print("error: correlator code_e memory allocation\n");
             return;
     }
     code=code_e+smax;
@@ -756,7 +756,7 @@ extern void pcorrelator(const char *data, int dtype, double ti, int n,
         !(dataI=(short *)sdrmalloc(sizeof(short)*(m+64)))||
         !(dataQ=(short *)sdrmalloc(sizeof(short)*(m+64)))||
         !(datax=cpxmalloc(m))) {
-            SDRPRINTF("error: pcorrelator memory allocation\n");
+            debug_print("error: pcorrelator memory allocation\n");
             return;
     }
 

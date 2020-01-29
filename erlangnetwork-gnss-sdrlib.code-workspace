@@ -6,7 +6,7 @@
 	],
 	"settings": {
 		"files.associations": {
-			"sdr.h": "c",
+			"measurement_engine.h": "c",
 			"libusb.h": "c"
 		}
 	}

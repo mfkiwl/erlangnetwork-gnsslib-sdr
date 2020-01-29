@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 #define P2_34       5.820766091346741E-11 /* 2^-34 */
 #define P2_46       1.421085471520200E-14 /* 2^-46 */
@@ -252,10 +252,10 @@ extern int decode_page_e1b(const uint8_t *buff1, const uint8_t *buff2,
 }
 /* decode Galileo navigation data ----------------------------------------------
 * decode Galileo E1B (I/NAV) navigation data and extract ephemeris
-* args   : sdrnav_t *nav    I/O sdr navigation struct
+* args   : navigation_t *nav    I/O sdr navigation struct
 * return : int                  word type
 *-----------------------------------------------------------------------------*/
-extern int decode_e1b(sdrnav_t *nav)
+extern int decode_e1b(navigation_t *nav)
 {
     int i,id=0,bits[500],bits_e1b[240];
     uint8_t enc_e1b[240],dec_e1b1[15],dec_e1b2[15];
@@ -308,12 +308,12 @@ extern int decode_e1b(sdrnav_t *nav)
     }
     /* CRC sheck */
     if (checkcrc_e1b(dec_e1b1,dec_e1b2)<0) {
-        SDRPRINTF("error: E1B CRC mismatch\n");
+        debug_print("error: E1B CRC mismatch\n");
         return -1;
     } else {
         /* decode navigation data */
         id=decode_page_e1b(dec_e1b1,dec_e1b2,&nav->sdreph);
-        if (id<0||id>10) SDRPRINTF("error: E1B nav word number sfn=%d\n",id);
+        if (id<0||id>10) debug_print("error: E1B nav word number sfn=%d\n",id);
     }
     return id;
 }

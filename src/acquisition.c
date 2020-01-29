@@ -1,9 +1,13 @@
-/*------------------------------------------------------------------------------
-* sdracq.c : SDR acquisition functions
-*
-* Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
-*-----------------------------------------------------------------------------*/
-#include "sdr.h"
+/**
+ * @file acquisition.c
+ * @date January 29, 2020
+ * @author Shu Wang <shuwang1@outlook.com>
+ * @brief GNSS Signal acquisition functions.
+ * 
+ * \copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
+ * \copyright Private Uses are permitted but commercial uses shall be licensed. See LICENSE file.
+ * **/
+#include "measurement_engine.h"
 
 /* sdr acquisition function ----------------------------------------------------
 * sdr acquisition function called from sdr channel thread
@@ -43,7 +47,7 @@ extern uint64_t acquisition(sdrch_t *sdr, double *power)
     }
 
     /* display acquisition results */
-    SDRPRINTF("%s, C/N0=%4.1f, peak=%3.1f, codei=%5d, freq=%8.1f\n",
+    debug_print("%s, C/N0=%4.1f, peak=%3.1f, codei=%5d, freq=%8.1f\n",
         sdr->satstr,sdr->acq.cn0,sdr->acq.peakr,sdr->acq.acqcodei,
         sdr->acq.acqfreq-sdr->f_if-sdr->foffset);
 

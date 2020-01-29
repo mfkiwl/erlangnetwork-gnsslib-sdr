@@ -4,7 +4,7 @@
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 * Copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
 *-----------------------------------------------------------------------------*/
-#include "../../../src/sdr.h"
+#include "../../../src/measurement_engine.h"
 
 static rtlsdr_dev_t *dev=NULL;
 
@@ -49,23 +49,23 @@ extern int rtlsdr_init( int carrierfreq_kHz, int samplingfreq_Hz )
     dev_index=verbose_device_search("0");
     ret=rtlsdr_open(&dev, (uint32_t)dev_index);
     if (ret<0) {
-        SDRPRINTF("error: failed to open rtlsdr device #%d.\n",dev_index);
+        debug_print("error: failed to open rtlsdr device #%d.\n",dev_index);
         return -1;
     }
 
     /* set configuration */
     ret=rtlsdr_initconf( carrierfreq_kHz, samplingfreq_Hz );
     if (ret<0) {
-        SDRPRINTF("error: failed to initialize rtlsdr\n");
+        debug_print("error: failed to initialize rtlsdr\n");
         return -1;
     }
 
     ret = rtlsdr_set_gpio( dev, 0, 1 );
     //ret = rtlsdr_set_bias_tee( &dev, 1 );
     if (ret<0) {
-        SDRPRINTF("error: failed to set the base T\n");
+        debug_print("error: failed to set the base T\n");
     }else{
-        SDRPRINTF("The base T of the RTL-SDR device is set.\n");
+        debug_print("The base T of the RTL-SDR device is set.\n");
     }
 
     return 0;
@@ -92,28 +92,28 @@ extern int rtlsdr_initconf( int carrierfreq_kHz, int samplingfreq_Hz )
     /* Set the sample rate */
     ret=verbose_set_sample_rate( dev, samplingfreq_Hz );
     if (ret<0) {
-        SDRPRINTF("error: failed to set samplerate\n");
+        debug_print("error: failed to set samplerate\n");
         return -1;
     }
 
     /* Set the frequency */
     ret=verbose_set_frequency( dev, carrierfreq_kHz * 1000 );
     if (ret<0) {
-        SDRPRINTF("error: failed to set frequency\n");
+        debug_print("error: failed to set frequency\n");
         return -1;
     }
 
     /* Enable automatic gain */
     ret=verbose_auto_gain(dev);
     if (ret<0) {
-        SDRPRINTF("error: failed to set automatic gain\n");
+        debug_print("error: failed to set automatic gain\n");
         return -1;
     }
 
     /* set ppm offset */
     ret=verbose_ppm_set(dev,sdrini.rtlsdrppmerr);
     if (ret<0) {
-        SDRPRINTF("error: failed to set ppm\n");
+        debug_print("error: failed to set ppm\n");
         return -1;
     }
 
@@ -131,7 +131,7 @@ extern int rtlsdr_start(void)
     /* reset endpoint before we start reading from it (mandatory) */
     ret=verbose_reset_buffer(dev);
     if (ret<0) {
-        SDRPRINTF("error: failed to reset buffers\n");
+        debug_print("error: failed to reset buffers\n");
         return -1;
     }
 
@@ -140,7 +140,7 @@ extern int rtlsdr_start(void)
         NULL,RTLSDR_ASYNC_BUF_NUMBER,2*RTLSDR_DATABUFF_SIZE);
 
     if (ret<0&&!sdrstat.stopflag) {
-        SDRPRINTF("error: failed to read in async mode\n");
+        debug_print("error: failed to read in async mode\n");
         return -1;
     }
 
@@ -203,7 +203,7 @@ extern void frtlsdr_pushtomembuf(void)
 
     if (nread<2*RTLSDR_DATABUFF_SIZE) {
         sdrstat.stopflag=ON;
-        SDRPRINTF("end of file!\n");
+        debug_print("end of file!\n");
     }
 
     mlock(hreadmtx);

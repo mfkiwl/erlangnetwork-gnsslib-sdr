@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 #ifdef WIN32
 static int errsock(void) {return WSAGetLastError();}
@@ -105,7 +105,8 @@ extern int createrinexobs(char *file, rnxopt_t *opt)
 
     /* write rinex header */
     if ((fd=fopen(file,"w"))==NULL) {
-        SDRPRINTF("error: rinex obs can't be created %s",file); return -1;
+        debug_print("error: rinex obs can't be created %s",file); 
+        return -1;
     }
     outrnxobsh(fd,opt,&nav);
     fclose(fd);
@@ -125,7 +126,7 @@ extern int writerinexobs(char *file, rnxopt_t *opt, obsd_t *obsd, int ns)
 
     /* write rinex body */
     if ((fd=fopen(file,"a"))==NULL) {
-        SDRPRINTF("error: rinex obs can't be written %s",file); return -1;
+        debug_print("error: rinex obs can't be written %s",file); return -1;
     }
     outrnxobsb(fd,opt,obsd,ns,0);
     fclose(fd);
@@ -154,7 +155,7 @@ extern int createrinexnav(char *file, rnxopt_t *opt)
 
     /* write rinex header */
     if ((fd=fopen(file,"w"))==NULL) {
-        SDRPRINTF("error: rinex nav can't be created %s",file); return -1;
+        debug_print("error: rinex nav can't be created %s",file); return -1;
     }
     outrnxnavh(fd,opt,&nav);
     fclose(fd);
@@ -174,7 +175,7 @@ extern int writerinexnav(char *file, rnxopt_t *opt, sdreph_t *sdreph)
 
     /* write rinex body */
     if ((fd=fopen(file,"a"))==NULL) {
-        SDRPRINTF("error: rinex nav can't be written %s",file); 
+        debug_print("error: rinex nav can't be written %s",file); 
         return -1;
     }
     
@@ -184,7 +185,7 @@ extern int writerinexnav(char *file, rnxopt_t *opt, sdreph_t *sdreph)
     else /* other GNSS */
         outrnxnavb(fd,opt,&sdreph->eph);
 
-    SDRPRINTF("prn=%d rinex output navigation data\n",sdreph->prn);   
+    debug_print("prn=%d rinex output navigation data\n",sdreph->prn);   
     fclose(fd);
     return 0;
 }
@@ -196,7 +197,7 @@ int socketstartup(void)
 #ifdef WIN32
     WSADATA data;
     if (WSAStartup(MAKEWORD(2,0),&data)!=0) {
-        SDRPRINTF("error: tcp/ip WSAStartup() failed\n");
+        debug_print("error: tcp/ip WSAStartup() failed\n");
         return -1;
     }
 #endif
@@ -229,7 +230,7 @@ static void *tcpsvrthread(void * arg)
 
     /* create socket */
     if ((soc->s_soc=socket(AF_INET,SOCK_STREAM,0))==INVALID_SOCKET) {
-        SDRPRINTF("error: tcp/ip socket failed with %d\n",errsock());
+        debug_print("error: tcp/ip socket failed with %d\n",errsock());
         socketcleanup();
         return THRETVAL;
     }
@@ -245,7 +246,7 @@ static void *tcpsvrthread(void * arg)
     /* bind to the local address */
     if ((bind(soc->s_soc,(struct sockaddr *)&srcAddr,
             sizeof(srcAddr)))==SOCKET_ERROR) {
-        SDRPRINTF("error: tcp/ip bind failed with %d soc=%d\n",
+        debug_print("error: tcp/ip bind failed with %d soc=%d\n",
             errsock(),(int)soc->s_soc);
         
         socketcleanup();
@@ -254,19 +255,19 @@ static void *tcpsvrthread(void * arg)
 
     /* listen */
     if ((listen(soc->s_soc,SOMAXCONN))==SOCKET_ERROR) {
-        SDRPRINTF("error: tcp/ip listen failed with %d\n",errsock());
+        debug_print("error: tcp/ip listen failed with %d\n",errsock());
         socketcleanup();
         return THRETVAL;
     }
 
-    SDRPRINTF("Waiting for connection ...\n");
+    debug_print("Waiting for connection ...\n");
     while (1) {
         /* accept */
         if ((soc->c_soc=accept(soc->s_soc,
             (struct sockaddr *)&dstAddr,&dstAddrSize))==INVALID_SOCKET) {
             return THRETVAL;
         }
-        SDRPRINTF("Connected from %s!\n", inet_ntoa(dstAddr.sin_addr));
+        debug_print("Connected from %s!\n", inet_ntoa(dstAddr.sin_addr));
         soc->flag=ON;
     }
     return THRETVAL;
@@ -336,7 +337,7 @@ extern void sendrtcmnav(sdreph_t *sdreph, sdrsoc_t *soc)
     if (send(soc->c_soc,(char*)rtcm.buff,rtcm.nbyte,0)==SOCKET_ERROR) {
         soc->flag=OFF;
     } else {
-        SDRPRINTF("prn=%d rtcm output navigation data\n",sdreph->prn);
+        debug_print("prn=%d rtcm output navigation data\n",sdreph->prn);
     }
 }
 /* send observation data via tcp/ip --------------------------------------------
@@ -423,10 +424,10 @@ void writelog_header(FILE *fp, sdrtrk_t *trk)
 * write tracking log to file
 * args   : FILE     *fp     I   file pointer
 *          sdrtrk_t *trk    I   sdr tracking struct
-*          sdrnav_t *nav    I   sdr navigation struct
+*          navigation_t *nav    I   sdr navigation struct
 * return : none
 *-----------------------------------------------------------------------------*/
-extern void writelog(FILE *fp, sdrtrk_t *trk,sdrnav_t *nav)
+extern void writelog(FILE *fp, sdrtrk_t *trk,navigation_t *nav)
 {
     int i,ind[64]={0},n=trk->corrn;
     /* generating correlation points indices */

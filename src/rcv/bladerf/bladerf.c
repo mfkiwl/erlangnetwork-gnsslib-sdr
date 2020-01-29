@@ -4,7 +4,7 @@
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 * Copyright (C) 2014 Nuand LLC
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 struct bladerf *bladerf; 
 struct bladerf_stream *stream;
@@ -60,14 +60,14 @@ extern int bladerf_init(void)
     /* open bladeRF */
     ret=bladerf_open(&bladerf,NULL);
     if (ret<0) {
-        SDRPRINTF("error: failed to open bladerf: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to open bladerf: %s\n",bladerf_strerror(ret));
         return -1;
     }
 
     /* check FPGA */
     ret=bladerf_is_fpga_configured(bladerf);
     if (ret<0) {
-        SDRPRINTF("error: failed to config. FPGA: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to config. FPGA: %s\n",bladerf_strerror(ret));
         bladerf_close(bladerf);
         return -1;
     } else if (ret==0) {
@@ -85,12 +85,12 @@ extern int bladerf_init(void)
             
             ret=bladerf_load_fpga(bladerf,fpga);
         } else {
-            SDRPRINTF("error: get_fpga_size: %s\n",bladerf_strerror(ret));
+            debug_print("error: get_fpga_size: %s\n",bladerf_strerror(ret));
             bladerf_close(bladerf);
             return -1;
         }
         if (ret<0) {
-            SDRPRINTF("error: failed to load FPGA: %s\n",bladerf_strerror(ret));
+            debug_print("error: failed to load FPGA: %s\n",bladerf_strerror(ret));
             bladerf_close(bladerf);
             return -1;
         }
@@ -99,7 +99,7 @@ extern int bladerf_init(void)
     /* set configuration */
     ret=bladerf_initconf();
     if (ret<0) {
-        SDRPRINTF("error: failed to init. bladerf: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to init. bladerf: %s\n",bladerf_strerror(ret));
         return -1;
     }
     return 0;
@@ -129,7 +129,7 @@ extern int bladerf_initconf(void)
     /* set center frequency (currently only L1) */
     ret=bladerf_set_frequency(bladerf,module,(unsigned int)(FREQ1));
     if (ret<0) {
-        SDRPRINTF("error: failed to set frequency: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to set frequency: %s\n",bladerf_strerror(ret));
         bladerf_quit();
         return -1;
     }
@@ -137,14 +137,14 @@ extern int bladerf_initconf(void)
     /* set bandwidth (half of sampling frequency) */
     ret=bladerf_set_bandwidth(bladerf,module,samplerate/2,&actual);
     if (ret<0) {
-        SDRPRINTF("error: failed to set bandwidth: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to set bandwidth: %s\n",bladerf_strerror(ret));
         bladerf_quit();
         return -1;
     }
     /* set sample rate */
     ret=bladerf_set_sample_rate(bladerf,module,samplerate,&actual);
     if (ret<0) {
-        SDRPRINTF("error: failed to set samprate: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to set samprate: %s\n",bladerf_strerror(ret));
         bladerf_quit();
         return -1;
     }
@@ -153,7 +153,7 @@ extern int bladerf_initconf(void)
     ret=bladerf_init_stream(&stream,bladerf,stream_callback,&buffers,
                     16,BLADERF_FORMAT_SC16_Q11,BLADERF_DATABUFF_SIZE,16,NULL);
     if (ret<0) {
-        SDRPRINTF("error: failed to init. stream: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to init. stream: %s\n",bladerf_strerror(ret));
         bladerf_quit();
         return -1;
     }
@@ -171,14 +171,14 @@ extern int bladerf_start(void)
     /* enable RF module */
     ret=bladerf_enable_module(bladerf,module,true);
     if (ret<0) {
-        SDRPRINTF("error: failed to enable module: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to enable module: %s\n",bladerf_strerror(ret));
         return -1;
     }
 
     /* start stream and stay there until we kill the stream */
     ret=bladerf_stream(stream,module);
     if (ret<0) {
-        SDRPRINTF("error: stream error: %s\n", bladerf_strerror(ret));
+        debug_print("error: stream error: %s\n", bladerf_strerror(ret));
         return -1;
     }
 
@@ -196,7 +196,7 @@ extern int bladerf_stop(void)
     /* disable RF module */
     ret=bladerf_enable_module(bladerf,module,false);
     if (ret<0) {
-        SDRPRINTF("error: failed to enable module: %s\n",bladerf_strerror(ret));
+        debug_print("error: failed to enable module: %s\n",bladerf_strerror(ret));
         return -1;
     }
 
@@ -308,7 +308,7 @@ extern void fbladerf_pushtomembuf(void)
 
     if (nread<2*BLADERF_DATABUFF_SIZE) {
         sdrstat.stopflag=ON;
-        SDRPRINTF("end of file!\n");
+        debug_print("end of file!\n");
     }
 
     mlock(hreadmtx);

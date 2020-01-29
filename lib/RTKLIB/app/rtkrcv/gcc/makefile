@@ -7,8 +7,16 @@ SRC    = ../../../src
 #CTARGET= -mfpu=neon -mfloat-abi=softfp -ffast-math
 CTARGET= -DENAGLO -DENAQZS -DENACMP -DNFREQ=3
 
-CFLAGS = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -I.. -DTRACE $(CTARGET) -g
-LDLIBS  = -lm -lrt -lpthread
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -I.. -DTRACE $(CTARGET) -g
+	LDLIBS  = -lm -lrt -lpthread
+endif
+
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -I.. -DTRACE $(CTARGET) -g
+	LDLIBS  = -lm -lpthread
+endif
 
 all        : rtkrcv
 rtkrcv     : rtkrcv.o vt.o rtkcmn.o rtksvr.o rtkpos.o geoid.o solution.o lambda.o

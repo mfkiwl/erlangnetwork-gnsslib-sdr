@@ -29,7 +29,7 @@ extern "C" {
 typedef struct rtlsdr_dev rtlsdr_dev_t;
 
 /*-- ERLANG NETWORK GNSS-SDRLIB ----------------------------------------------*/
-#include "../../../src/sdr.h"
+#include "../../../src/measurement_engine.h"
     
 #define RTLSDR_SAMPLE_RATE      2048000
 #define RTLSDR_FREQUENCY        1575420000

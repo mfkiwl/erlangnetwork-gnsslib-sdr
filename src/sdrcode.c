@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* code chip length (chip) */
 #define LEN_L1CA        1023        /* GPS/QZSS L1C/A */
@@ -1383,7 +1383,7 @@ extern short *gencode(int prn, int ctype, int *len, double *crate)
     case CTYPE_NH10  : return gencode_NH10(len,crate);
     case CTYPE_NH20  : return gencode_NH20(len,crate);
     default          : 
-        SDRPRINTF("error: gencode prn:%d ctype:%d",prn,ctype);
+        debug_print("error: gencode prn:%d ctype:%d",prn,ctype);
         return NULL;
     }
 }

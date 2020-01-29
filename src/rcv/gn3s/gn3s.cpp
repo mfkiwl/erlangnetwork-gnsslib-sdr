@@ -4,7 +4,7 @@
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 * Copyright (C) 2006 Marcus Junered
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 #include "fx2.h"
 
 /* global variables ----------------------------------------------------------*/
@@ -26,7 +26,7 @@ extern int gn3s_init(void)
     if (fx2_d.usb_fx2_find() != 0) {
         version = 2;
         if (sdrini.fend!=FEND_GN3SV2) {
-            SDRPRINTF("error: wrong frontend type, GN3SV2 is found\n"); 
+            debug_print("error: wrong frontend type, GN3SV2 is found\n"); 
             return -1;
         }
     } else {
@@ -34,7 +34,7 @@ extern int gn3s_init(void)
         if (fx2_d.usb_fx2_find() != 0) {
             version = 3;
             if (sdrini.fend!=FEND_GN3SV3) {
-                SDRPRINTF("error: wrong frontend type, GN3SV3 is found\n"); 
+                debug_print("error: wrong frontend type, GN3SV3 is found\n"); 
                 return -1;
             }
         } else {
@@ -42,11 +42,11 @@ extern int gn3s_init(void)
             if(fx2_d.usb_fx2_find()!=0) {
                 version = 3;
                 if (sdrini.fend!=FEND_GN3SV3) {
-                    SDRPRINTF("error: wrong frontend type, GN3SV3 is found\n");
+                    debug_print("error: wrong frontend type, GN3SV3 is found\n");
                     return -1;
                 }
             } else {
-                SDRPRINTF("error: no GN3S frontend found\n"); 
+                debug_print("error: no GN3S frontend found\n"); 
                 return -1;
             }
         }
@@ -217,7 +217,7 @@ extern int gn3s_pushtomembuf(void)
     unmlock(hbuffmtx);
 
     if (nbuff!=GN3S_BUFFSIZE) {
-        SDRPRINTF("GN3S read IF error...\n");
+        debug_print("GN3S read IF error...\n");
     }
 
     mlock(hreadmtx);
@@ -245,7 +245,7 @@ extern void fgn3s_pushtomembuf(void)
 
     if (nread<GN3S_BUFFSIZE) {
         sdrstat.stopflag=ON;
-        SDRPRINTF("end of file!\n");
+        debug_print("end of file!\n");
     }
 
     mlock(hreadmtx);

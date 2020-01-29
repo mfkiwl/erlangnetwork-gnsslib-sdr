@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* decode GPS/QZS navigation data (subframe 1) ---------------------------------
 *
@@ -164,10 +164,10 @@ extern int paritycheck_l1ca(int *bits)
 }
 /* decode GPS/QZS L1CA navigation data -----------------------------------------
 * decode GPS/QZS L1CA navigation data and extract ephemeris
-* args   : sdrnav_t *nav    I/O sdr navigation struct
+* args   : navigation_t *nav    I/O sdr navigation struct
 * return : int                  subframe ID (1-5)
 *-----------------------------------------------------------------------------*/
-extern int decode_l1ca(sdrnav_t *nav)
+extern int decode_l1ca(navigation_t *nav)
 {
     int i,j,id=0;
     uint8_t bin[38];
@@ -184,7 +184,7 @@ extern int decode_l1ca(sdrnav_t *nav)
     /* decode navigation data */
     id=decode_frame_l1ca(bin,&nav->sdreph);
     if (id<1||id>5)
-        SDRPRINTF("error: GPS subframe number sfn=%d\n",id);
+        debug_print("error: GPS subframe number sfn=%d\n",id);
 
     return id;
 }

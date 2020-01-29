@@ -1,6 +1,6 @@
 /* correlator performence test */
 #include <stdio.h>
-#include "sdr.h"
+#include "measurement_engine.h"
 
 int main(int argc, char **argc)
 {

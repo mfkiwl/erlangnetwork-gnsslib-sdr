@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* sdr tracking function -------------------------------------------------------
 * sdr tracking function called from sdr channel thread
@@ -179,16 +179,16 @@ extern void setobsdata(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt,
     /* carrier phase */
     if (!trk->flagremcarradd) {
         trk->L[0]-=trk->remcarr/DPI;
-        //SDRPRINTF("%s cnt=%llu inicarrier=%f m\n",sdr->satstr,cnt,CLIGHT/FREQ1*trk->remcarr/DPI);
+        //debug_print("%s cnt=%llu inicarrier=%f m\n",sdr->satstr,cnt,CLIGHT/FREQ1*trk->remcarr/DPI);
         trk->flagremcarradd=ON;
     }
 
     if (sdr->nav.flagsyncf&&!trk->flagpolarityadd) {
         if (sdr->nav.polarity==1) {
             trk->L[0]+=0.5;
-            //SDRPRINTF("%s cnt=%llu polarity=0.5\n",sdr->satstr,cnt);
+            //debug_print("%s cnt=%llu polarity=0.5\n",sdr->satstr,cnt);
         } else {
-            //SDRPRINTF("%s cnt=%llu polarity=0.0\n",sdr->satstr,cnt);
+            //debug_print("%s cnt=%llu polarity=0.0\n",sdr->satstr,cnt);
         }
         trk->flagpolarityadd=ON;
     }

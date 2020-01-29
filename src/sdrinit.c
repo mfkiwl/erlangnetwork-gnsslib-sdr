@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* read ini file -------------------------------------------------------------*/
 #ifndef WIN32
@@ -110,7 +110,7 @@ extern int readinifile( sdrini_t *ini, const char *inifile )
 
     /* check ini file */
     if ((ret=GetFileAttributes(inifile))<0){
-        SDRPRINTF("error: %s doesn't exist\n", inifile );
+        debug_print("error: %s doesn't exist\n", inifile );
         return -1;
     }
     /* receiver setting */
@@ -118,7 +118,7 @@ extern int readinifile( sdrini_t *ini, const char *inifile )
 
     /* check front-end configuration  file */
     if ((ret=GetFileAttributes(fendfile))<0){
-        SDRPRINTF("error: %s doesn't exist\n",fendfile);
+        debug_print("error: %s doesn't exist\n",fendfile);
         return -1;
     }
     readinistr(fendfile,"FEND","TYPE",str);
@@ -133,7 +133,7 @@ extern int readinifile( sdrini_t *ini, const char *inifile )
     else if (strcmp(str,"FILEBLADERF")==0) ini->fend=FEND_FBLADERF;
     else if (strcmp(str,"FILERTLSDR")==0) ini->fend=FEND_FRTLSDR;
     else if (strcmp(str,"FILE")==0)       ini->fend=FEND_FILE;
-    else { SDRPRINTF("error: wrong frontend type: %s\n",str); return -1; }
+    else { debug_print("error: wrong frontend type: %s\n",str); return -1; }
     if (ini->fend==FEND_FILE    ||ini->fend==FEND_FSTEREO||
         ini->fend==FEND_FGN3SV2 ||ini->fend==FEND_FGN3SV3||
         ini->fend==FEND_FBLADERF||ini->fend==FEND_FRTLSDR) {
@@ -170,14 +170,14 @@ extern int readinifile( sdrini_t *ini, const char *inifile )
     /* channel setting */
     ini->nch=readiniint(inifile,"CHANNEL","NCH");
     if (ini->nch<1) {
-        SDRPRINTF("error: wrong inifile value NCH=%d\n",ini->nch);
+        debug_print("error: wrong inifile value NCH=%d\n",ini->nch);
         return -1;
     }
     if ((ret=readiniints(inifile,"CHANNEL","PRN",ini->prn,ini->nch))<0 ||
         (ret=readiniints(inifile,"CHANNEL","SYS",ini->sys,ini->nch))<0 ||
         (ret=readiniints(inifile,"CHANNEL","CTYPE",ini->ctype,ini->nch))<0 ||
         (ret=readiniints(inifile,"CHANNEL","FTYPE",ini->ftype,ini->nch))<0) {
-            SDRPRINTF("error: wrong inifile value NCH=%d\n",ini->nch);
+            debug_print("error: wrong inifile value NCH=%d\n",ini->nch);
             return -1;
     }
 
@@ -228,7 +228,7 @@ extern int chk_initvalue(sdrini_t *ini)
     /* checking frequency input */
     if ((ini->f_sf[0]<=0||ini->f_sf[0]>100e6) ||
         (ini->f_if[0]<0 ||ini->f_if[0]>100e6)) {
-            SDRPRINTF("error: wrong freq. input sf1: %.0f if1: %.0f\n",
+            debug_print("error: wrong freq. input sf1: %.0f if1: %.0f\n",
                 ini->f_sf[0],ini->f_if[0]);
             return -1;
     }
@@ -237,7 +237,7 @@ extern int chk_initvalue(sdrini_t *ini)
     if(ini->useif2||ini->fend==FEND_STEREO) {
         if ((ini->f_sf[1]<=0||ini->f_sf[1]>100e6) ||
             (ini->f_if[1]<0 ||ini->f_if[1]>100e6)) {
-                SDRPRINTF("error: wrong freq. input sf2: %.0f if2: %.0f\n",
+                debug_print("error: wrong freq. input sf2: %.0f if2: %.0f\n",
                     ini->f_sf[1],ini->f_if[1]);
                 return -1;
         }
@@ -246,7 +246,7 @@ extern int chk_initvalue(sdrini_t *ini)
     /* checking port number input */
     if ((ini->rtcmport<0||ini->rtcmport>32767) ||
         (ini->lexport<0||ini->lexport>32767)) {
-            SDRPRINTF("error: wrong rtcm port rtcm:%d lex:%d\n",
+            debug_print("error: wrong rtcm port rtcm:%d lex:%d\n",
                 ini->rtcmport,ini->lexport);
             return -1;
     }
@@ -256,15 +256,15 @@ extern int chk_initvalue(sdrini_t *ini)
         ini->fend==FEND_FGN3SV2||ini->fend==FEND_FGN3SV2||
         ini->fend==FEND_FRTLSDR||ini->fend==FEND_FBLADERF) {
         if (ini->useif1&&((ret=GetFileAttributes(ini->file1))<0)){
-            SDRPRINTF("error: file1 doesn't exist: %s\n",ini->file1);
+            debug_print("error: file1 doesn't exist: %s\n",ini->file1);
             return -1;
         }
         if (ini->useif2&&((ret=GetFileAttributes(ini->file2))<0)){
-            SDRPRINTF("error: file2 doesn't exist: %s\n",ini->file2);
+            debug_print("error: file2 doesn't exist: %s\n",ini->file2);
             return -1;
         }
         if ((!ini->useif1)&&(!ini->useif2)) {
-            SDRPRINTF("error: file1 or file2 are not selected\n");
+            debug_print("error: file1 or file2 are not selected\n");
             return -1;
         }
     }
@@ -272,7 +272,7 @@ extern int chk_initvalue(sdrini_t *ini)
     /* checking rinex directory */
     if (ini->rinex) {
         if ((ret=GetFileAttributes(ini->rinexpath))<0) {
-            SDRPRINTF("error: rinex output directory doesn't exist: %s\n",
+            debug_print("error: rinex output directory doesn't exist: %s\n",
                 ini->rinexpath);
             return -1;
         }
@@ -397,16 +397,34 @@ extern void quitpltstruct(sdrplt_t *acq, sdrplt_t *trk)
 * args   : int sys          I   system type (SYS_GPS...)
 *          int ctype        I   code type (CTYPE_L1CA...)
 *          int prn          I   PRN
-*          sdracq_t *acq    I/0 acquisition struct
+*          acquisition_t *acq    I/0 acquisition struct
 * return : none
 *-----------------------------------------------------------------------------*/
-extern void initacqstruct(int sys, int ctype, int prn, sdracq_t *acq)
+extern void initacqstruct( int sys, int ctype, int prn, acquisition_t *acq )
 {
-    if (ctype==CTYPE_L1CA) acq->intg=ACQINTG_L1CA;
-    if (ctype==CTYPE_G1)   acq->intg=ACQINTG_G1;
-    if (ctype==CTYPE_E1B)  acq->intg=ACQINTG_E1B;
-    if (ctype==CTYPE_B1I)  acq->intg=ACQINTG_B1I;
-    if (ctype==CTYPE_L1SAIF||ctype==CTYPE_L1SBAS) acq->intg=ACQINTG_SBAS;
+    switch( ctype ){
+        case CTYPE_L1CA:
+            acq->intg = ACQINTG_L1CA;
+            break;
+        case CTYPE_G1:
+            acq->intg = ACQINTG_G1;
+            break;
+        case CTYPE_E1B:
+            acq->intg = ACQINTG_E1B;
+            break;
+        case CTYPE_B1I:
+            acq->intg = ACQINTG_B1I;
+            break;
+        case CTYPE_L1SAIF:
+        case CTYPE_L1SBAS:
+            acq->intg = ACQINTG_SBAS;
+            break;
+        case CTYPE_L2CM:
+            acq->intg = ACQINTG_L2CM;
+            break;
+        default:
+            acq->intg = ACQINTG_L1CA;
+    }
 
     acq->hband=ACQHBAND;
     acq->step=ACQSTEP;
@@ -500,7 +518,7 @@ extern int inittrkstruct(int sat, int ctype, double ctime, sdrtrk_t *trk)
 
     if (!trk->II||!trk->QQ||!trk->oldI||!trk->oldQ||!trk->sumI||!trk->sumQ||
         !trk->oldsumI||!trk->oldsumQ) {
-        SDRPRINTF("error: inittrkstruct memory allocation\n");
+        debug_print("error: inittrkstruct memory allocation\n");
         return -1;
     }
     return 0;
@@ -510,10 +528,10 @@ extern int inittrkstruct(int sat, int ctype, double ctime, sdrtrk_t *trk)
 * args   : int sys          I   system type (SYS_GPS...)
 *          int ctype        I   code type (CTYPE_L1CA...)
 *          int prn          I   PRN (or SV) number
-*          sdrnav_t *nav    I/0 navigation struct
+*          navigation_t *nav    I/0 navigation struct
 * return : int                  0:okay -1:error
 *-----------------------------------------------------------------------------*/
-extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav)
+extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav)
 {
     int i;
     int pre_l1ca[8]= { 1,-1,-1,-1, 1,-1, 1, 1}; /* L1CA preamble*/
@@ -559,7 +577,7 @@ extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav)
 
         /* create fec */
         if((nav->fec=create_viterbi27_port(NAVFLEN_SBAS/2))==NULL) {
-            SDRPRINTF("error: create_viterbi27 failed\n");
+            debug_print("error: create_viterbi27 failed\n");
             return -1;
         }
         /* set polynomial */
@@ -596,7 +614,7 @@ extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav)
 
         /* create fec */
         if((nav->fec=create_viterbi27_port(120))==NULL) {
-            SDRPRINTF("error: create_viterbi27 failed\n");
+            debug_print("error: create_viterbi27 failed\n");
             return -1;
         }
         /* set polynomial */
@@ -640,7 +658,7 @@ extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav)
     if (!(nav->bitsync= (int *)calloc(nav->rate,sizeof(int))) || 
         !(nav->fbits=   (int *)calloc(nav->flen+nav->addflen,sizeof(int))) ||
         !(nav->fbitsdec=(int *)calloc(nav->flen+nav->addflen,sizeof(int)))) {
-            SDRPRINTF("error: initnavstruct memory alocation\n");
+            debug_print("error: initnavstruct memory alocation\n");
             return -1;
     }
     return 0;
@@ -679,7 +697,7 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
     
     /* code generation */
     if (!(sdr->code=gencode( prn, ctype, &sdr->clen, &sdr->crate ))) {
-        SDRPRINTF("error: gencode\n"); return -1;
+        debug_print("error: gencode\n"); return -1;
     }
     sdr->ci=sdr->ti*sdr->crate;
     sdr->ctime = sdr->clen/sdr->crate;
@@ -708,7 +726,7 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
 
     /* memory allocation */
     if (!(sdr->acq.freq=(double*)malloc(sizeof(double)*sdr->acq.nfreq))) {
-        SDRPRINTF("error: initsdrch memory alocation\n"); return -1;
+        debug_print("error: initsdrch memory alocation\n"); return -1;
     }
 
     /* doppler search frequency */
@@ -726,7 +744,7 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
     /* memory allocation */
     if (!(rcode=(short *)sdrmalloc(sizeof(short)*sdr->acq.nfft)) || 
         !(sdr->xcode=cpxmalloc(sdr->acq.nfft))) {
-            SDRPRINTF("error: initsdrch memory alocation\n"); return -1;
+            debug_print("error: initsdrch memory alocation\n"); return -1;
     }
     /* other code generation */
     for (i=0;i<sdr->acq.nfft;i++) rcode[i]=0; /* zero padding */

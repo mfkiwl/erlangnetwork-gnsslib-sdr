@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 #define P2_66       1.355252715606881E-20 /* 2^-66 */
 #define SC2RAD_CMP  3.1415926535898 /* PI in BeiDou ICD */
@@ -421,10 +421,10 @@ void decodebch_bi1(int *bits, int *decbits)
 }
 /* decode BeiDou navigation data -----------------------------------------------
 * decode Galileo E1B (I/NAV) navigation data and extract ephemeris
-* args   : sdrnav_t *nav    I/O sdr navigation struct
+* args   : navigation_t *nav    I/O sdr navigation struct
 * return : int                  word type
 *-----------------------------------------------------------------------------*/
-extern int decode_b1i(sdrnav_t *nav)
+extern int decode_b1i(navigation_t *nav)
 {
     int i,j,id=0,bits[300],bitsdec[300],bitsbch[30],bit1[15],bit2[15];
     uint8_t bin[38]; /* 300/8 byte */

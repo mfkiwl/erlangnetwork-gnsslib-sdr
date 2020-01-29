@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* synchronization thread ------------------------------------------------------
 * synchronization thread for pseudo range computation  
@@ -81,7 +81,7 @@ extern void *syncthread(void * arg)
                 }
             }
             if (j==OBSINTERPN-1&&ind[i]==0) 
-                SDRPRINTF("error:%s reftow=%.1f tow=%.1f\n",
+                debug_print("error:%s reftow=%.1f tow=%.1f\n",
                     sdrch[isat[i]].satstr,trk[i].tow[OBSINTERPN-1],reftow);
         }
 
@@ -159,7 +159,7 @@ extern void *syncthread(void * arg)
     free(sdrout.obsd);
     tcpsvrclose(&sdrout.soc_rtcm);
     tcpsvrclose(&sdrout.soc_sbas);
-    SDRPRINTF("SDR syncthread finished!\n");
+    debug_print("SDR syncthread finished!\n");
 
     return THRETVAL;
 }

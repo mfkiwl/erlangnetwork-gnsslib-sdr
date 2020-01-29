@@ -6,8 +6,17 @@ SRC     = ../../../src
 OPTS    = -DTRACE -DENAGLO -DENAQZS -DENAGAL -DNFREQ=3
 
 # for no lapack
-CFLAGS  = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) $(OPTS) -g
-LDLIBS  = -lm -lrt
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS  = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) $(OPTS) -g
+	LDLIBS  = -lm -lrt
+endif
+
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS  = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) $(OPTS) -g
+	LDLIBS  = -lm
+endif
+
 
 #CFLAGS  = -Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable -I$(SRC) -DLAPACK $(OPTS)
 #LDLIBS  = -lm -lrt -llapack -lblas

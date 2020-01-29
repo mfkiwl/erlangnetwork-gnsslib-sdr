@@ -19,7 +19,7 @@
  * todo: use strtol for more flexible int parsing
  * */
 
-#include "sdr.h"
+#include "measurement_engine.h"
 
 double atofs(char *s)
 /* standard suffixes */

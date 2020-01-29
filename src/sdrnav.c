@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* sdr navigation data function ------------------------------------------------
 * decide navigation bit and decode navigation data
@@ -33,7 +33,7 @@ extern void sdrnavigation(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
     if (sdr->nav.flagsync) {
         /* navigation bit determination */
         if (checkbit(sdr->trk.II[0],sdr->trk.loopms,&sdr->nav)==OFF) {
-            //SDRPRINTF("%s nav sync error!!\n",sdr->satstr);
+            //debug_print("%s nav sync error!!\n",sdr->satstr);
         }
 
         /* check navigation frame synchronization */
@@ -49,7 +49,7 @@ extern void sdrnavigation(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
                 /* set reference sample data */
                 sdr->nav.firstsf=buffloc;
                 sdr->nav.firstsfcnt=cnt;
-                SDRPRINTF("*** find preamble! %s %d %d ***\n",
+                debug_print("*** find preamble! %s %d %d ***\n",
                     sdr->satstr,(int)cnt,sdr->nav.polarity);
                 sdr->nav.flagtow=ON;
             }
@@ -61,7 +61,7 @@ extern void sdrnavigation(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
                 predecodefec(&sdr->nav); /* FEC decoding */
                 sfn=decodenav(&sdr->nav); /* navigation message decoding */
                 
-                SDRPRINTF("%s ID=%d tow:%.1f week=%d cnt=%d\n",
+                debug_print("%s ID=%d tow:%.1f week=%d cnt=%d\n",
                     sdr->satstr,sfn,sdr->nav.sdreph.tow_gpst,
                     sdr->nav.sdreph.week_gpst,(int)cnt);
 
@@ -192,10 +192,10 @@ extern void interleave(const int *in, int row, int col, int *out)
 * check synchronization of navigation bit
 * args   : double IP        I   correlation output (IP data)
 *          double oldIP     I   previous correlation output
-*          sdrnav_t *nav    I/O navigation struct
+*          navigation_t *nav    I/O navigation struct
 * return : int                  1:synchronization 0: not synchronization
 *-----------------------------------------------------------------------------*/
-extern int checksync(double IP, double IPold, sdrnav_t *nav)
+extern int checksync(double IP, double IPold, navigation_t *nav)
 {
     int i,corr=0,maxi;
     
@@ -235,10 +235,10 @@ extern int checksync(double IP, double IPold, sdrnav_t *nav)
 * navigation data bit is determined using accumulated IP data
 * args   : double IP        I   correlation output (IP data)
 *          int    loopms    I   interval of loop filter (ms) 
-*          sdrnav_t *nav    I/O navigation struct
+*          navigation_t *nav    I/O navigation struct
 * return : int                  synchronization status 1:sync 0: not sync
 *-----------------------------------------------------------------------------*/
-extern int checkbit(double IP, int loopms, sdrnav_t *nav)
+extern int checkbit(double IP, int loopms, navigation_t *nav)
 {
     int diffi=nav->biti-nav->synci,syncflag=ON,polarity=1;
 
@@ -282,10 +282,10 @@ extern int checkbit(double IP, int loopms, sdrnav_t *nav)
 }
 /* decode foward error correction ----------------------------------------------
 * pre-decode foward error correction (before preamble detection)
-* args   : sdrnav_t *nav    I/O navigation struct
+* args   : navigation_t *nav    I/O navigation struct
 * return : none
 *-----------------------------------------------------------------------------*/
-extern void predecodefec(sdrnav_t *nav)
+extern void predecodefec(navigation_t *nav)
 {
     int i,j;
     unsigned char enc[NAVFLEN_SBAS+NAVADDFLEN_SBAS];
@@ -322,10 +322,10 @@ extern void predecodefec(sdrnav_t *nav)
 }
 /* parity check ----------------------------------------------------------------
 * parity check of navigation frame data
-* args   : sdrnav_t *nav    I/O navigation struct
+* args   : navigation_t *nav    I/O navigation struct
 * return : int                  1:okay 0: wrong parity
 *-----------------------------------------------------------------------------*/
-extern int paritycheck(sdrnav_t *nav)
+extern int paritycheck(navigation_t *nav)
 {
     int i,j,stat=0,crc,bits[MAXBITS];
     unsigned char bin[29]={0},pbin[3];
@@ -372,10 +372,10 @@ extern int paritycheck(sdrnav_t *nav)
 }
 /* find preamble bits ----------------------------------------------------------
 * search preamble bits from navigation data bits
-* args   : sdrnav_t *nav    I/O navigation struct
+* args   : navigation_t *nav    I/O navigation struct
 * return : int                  1:found 0: not found
 *-----------------------------------------------------------------------------*/
-extern int findpreamble(sdrnav_t *nav)
+extern int findpreamble(navigation_t *nav)
 {
     int i,corr=0;
 
@@ -425,10 +425,10 @@ extern int findpreamble(sdrnav_t *nav)
 }
 /* decode navigation data ------------------------------------------------------
 * decode navigation frame
-* args   : sdrnav_t *nav    I/O navigation struct
+* args   : navigation_t *nav    I/O navigation struct
 * return : int                  0:decode sucsess 0: decode error
 *-----------------------------------------------------------------------------*/
-extern int decodenav(sdrnav_t *nav)
+extern int decodenav(navigation_t *nav)
 {
     switch (nav->ctype) {
         /* GPS/QZSS L1CA (LNAV) */

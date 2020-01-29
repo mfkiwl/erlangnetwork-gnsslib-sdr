@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* global variables ----------------------------------------------------------*/
 #ifdef WIN32
@@ -32,7 +32,7 @@ extern int updatepltini(int nx, int ny, int posx, int posy)
     strcat(apppath,"\\gnuplot.ini");
 
     if (!(fp=fopen(apppath,"w"))) {
-        SDRPRINTF("error: updatepltini path=%s \n",apppath);
+        debug_print("error: updatepltini path=%s \n",apppath);
         return -1;
     }
     fprintf(fp,"set terminal windows\n");
@@ -43,7 +43,7 @@ extern int updatepltini(int nx, int ny, int posx, int posy)
     SHGetFolderPath(0,CSIDL_APPDATA,0,0,apppath);
     strcat(apppath,"\\wgnuplot.ini");
     if (!(fp=fopen(apppath,"w"))) { 
-        SDRPRINTF("error: updatepltini path=%s \n",apppath);
+        debug_print("error: updatepltini path=%s \n",apppath);
         return -1;
     }
     fprintf(fp,"[WGNUPLOT]\n");
@@ -63,7 +63,7 @@ extern int updatepltini(int nx, int ny, int posx, int posy)
     strcpy(apppath,getenv("HOME"));
     strcat(apppath,"/.gnuplot");
     if (!(fp=fopen(apppath,"w"))) { 
-        SDRPRINTF("error: updatepltini path=%s \n",apppath);
+        debug_print("error: updatepltini path=%s \n",apppath);
         return -1;
     }
     fprintf(fp,"set terminal x11 ");
@@ -120,20 +120,20 @@ extern int initsdrplot(sdrplt_t *plt)
     switch (plt->type) {
     case PLT_Y:
         if (!(plt->y=(double*)malloc(sizeof(double)*plt->ny))) {
-            SDRPRINTF("error: initsdrplot memory allocation\n");
+            debug_print("error: initsdrplot memory allocation\n");
             return -1;
         }
         break;
     case PLT_XY:
         if (!(plt->x=(double*)malloc(sizeof(double)*plt->nx)) ||
             !(plt->y=(double*)malloc(sizeof(double)*plt->nx))) {
-                SDRPRINTF("error: initsdrplot memory allocation\n");
+                debug_print("error: initsdrplot memory allocation\n");
                 return -1;
         }
         break;
     case PLT_SURFZ:
         if (!(plt->z=(double*)malloc(sizeof(double)*plt->nx*plt->ny))){
-            SDRPRINTF("error: initsdrplot memory allocation\n");
+            debug_print("error: initsdrplot memory allocation\n");
             return -1;
         }
         break;
@@ -151,7 +151,7 @@ extern int initsdrplot(sdrplt_t *plt)
 
     /* update config file */
     if ((updatepltini(plt->pltw,plt->plth,posx,posy)<0)){
-        SDRPRINTF("error: updatepltini\n");
+        debug_print("error: updatepltini\n");
         return -1;
     }
     /* pipe open */
@@ -161,7 +161,7 @@ extern int initsdrplot(sdrplt_t *plt)
     if (!(plt->fp=popen("gnuplot","w"))) {
 #endif
         unmlock(hpltmtx);
-        SDRPRINTF("error: gnuplot doesn't exist \n");
+        debug_print("error: gnuplot doesn't exist \n");
         return -1;
     }
     sleepms(200);

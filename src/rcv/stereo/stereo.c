@@ -4,7 +4,7 @@
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 * Copyright (C) 2012 Nottingham Scientific Limited
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 #ifdef STEREOV26
 #define STEREOBUFF STEREO_globalDataBuffer
@@ -32,11 +32,11 @@ extern int stereo_init(void)
     
     ret=STEREO_InitLibrary();
     if (ret!=0) {
-        SDRPRINTF("error: initialising Stereo driver\n"); return -1;
+        debug_print("error: initialising Stereo driver\n"); return -1;
     }
 
     if (!STEREO_IsConnected()) {
-        SDRPRINTF("error: STEREO does not appear to be connected\n"); return -1;
+        debug_print("error: STEREO does not appear to be connected\n"); return -1;
     }
     
     /* initiarize stereo */
@@ -83,7 +83,7 @@ extern int stereo_initoptions(void)
         case (int)FREQ1_GLO:
             strcpy(max2769,STEREO_MAX2769_G1); break;
         default:
-            SDRPRINTF("error: stereo_initoptions f_cf[0]= %f",sdrini.f_cf[0]);
+            debug_print("error: stereo_initoptions f_cf[0]= %f",sdrini.f_cf[0]);
             return -1;
     }
     
@@ -106,7 +106,7 @@ extern int stereo_initoptions(void)
         case (int)FREQ2_GLO:
             strcpy(max2112,STEREO_MAX2112_G2); break;
         default:
-            SDRPRINTF("error: stereo_initoptions f_cf[1]= %f",sdrini.f_cf[1]);
+            debug_print("error: stereo_initoptions f_cf[1]= %f",sdrini.f_cf[1]);
             return -1;
     }
     return 0;
@@ -122,7 +122,7 @@ extern int stereo_initconf(void)
     char cdcmd[]="cd ./frontend/stereo";
     
 #ifdef WIN32
-    SDRPRINTF("STEREO configuration start...\n");
+    debug_print("STEREO configuration start...\n");
 
     /* initialize configuration file */
     if (stereo_initoptions()<0) return -1;
@@ -146,10 +146,10 @@ extern int stereo_initconf(void)
         system(cmd);
     }
 #else
-    SDRPRINTF("STEREO configuration is not supported in Linux\n");
+    debug_print("STEREO configuration is not supported in Linux\n");
 #endif
     
-    SDRPRINTF("STEREO configuration is finished!\n");
+    debug_print("STEREO configuration is finished!\n");
     return 0;
 }
 /* initialization of data expansion --------------------------------------------
@@ -263,7 +263,7 @@ extern void fstereo_pushtomembuf(void)
 
     if (nread<STEREO_DATABUFF_SIZE) {
         sdrstat.stopflag=ON;
-        SDRPRINTF("end of file!\n");
+        debug_print("end of file!\n");
     }
 
     mlock(hreadmtx);

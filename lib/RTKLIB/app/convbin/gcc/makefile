@@ -9,9 +9,16 @@ SRC    = ../../../src
 INCLUDE= -I$(SRC)
 OPTIONS= -DTRACE -DENAGLO -DENAQZS -DENAGAL -DENACMP -DNFREQ=6 -DNEXOBS=3
 
-CFLAGS = -O3 -ansi -pedantic -Wall -Wno-unused-but-set-variable $(INCLUDE) $(OPTIONS) -g
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS = -O3 -ansi -pedantic -Wall -Wno-unused-but-set-variable $(INCLUDE) $(OPTIONS) -g
+	LDLIBS  = -lm -lrt
+endif
 
-LDLIBS = -lm -lrt
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS = -O3 -ansi -pedantic -Wall -Wno-unused-but-set-variable $(INCLUDE) $(OPTIONS) -g
+	LDLIBS  = -lm
+endif
 
 all  : convbin
 

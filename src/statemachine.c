@@ -1,10 +1,13 @@
 /**
- * \file sdrthread.c
- * \brief statemachine for each satellite under acquisition and tracking
- *
- * Copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
- ***/
-#include "sdr.h"
+ * @date January 29, 2020
+ * @author Shu Wang <shuwang1@outlook.com>
+ * @brief statemachine for each satellite under acquisition and tracking
+ * 
+ * \copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
+ * \copyright Private Uses are permitted but commercial uses shall be licensed. See LICENSE file.
+ **/
+
+#include "measurement_engine.h"
 
 /* sdr channel thread ----------------------------------------------------------
 * sdr channel thread for signal acquisition and tracking  
@@ -16,9 +19,9 @@
 #define ACQSLEEP      2000             /* acquisition process interval (ms) */
 
 #ifdef WIN32
-extern void sdrthread(void *arg)
+extern void statemachinethread(void *arg)
 #else
-extern void *sdrthread(void *arg)
+extern void *statemachinethread(void *arg)
 #endif
 {
     sdrch_t *sdr=(sdrch_t*)arg;
@@ -32,7 +35,7 @@ extern void *sdrthread(void *arg)
     if (sdrini.log) {
         sprintf(fname,"%s/log%s.csv", sdrini.logpath, sdr->satstr);
         if((fp=createlog(fname,&sdr->trk))==NULL) {
-            SDRPRINTF("error: invailed log file: %s\n",fname);
+            debug_print("error: invailed log file: %s\n",fname);
             return THRETVAL;
         }
     }
@@ -42,7 +45,7 @@ extern void *sdrthread(void *arg)
         sdrstat.stopflag=ON;
     }
     sleepms(sdr->no*500);
-    SDRPRINTF("**** %s sdr thread %d start! ****\n",sdr->satstr,sdr->no);
+    debug_print("**** %s sdr thread %d start! ****\n",sdr->satstr,sdr->no);
 
     sdr->flagacq = 0 ;
     while (!sdrstat.stopflag) {
@@ -125,7 +128,7 @@ extern void *sdrthread(void *arg)
                 }
 
                 if (sdr->no==1&&cnt%(1000*10)==0)
-                    SDRPRINTF("process %d sec...\n",(int)cnt/(1000));
+                    debug_print("process %d sec...\n",(int)cnt/(1000));
 
                 /* write tracking log */
                 if (sdrini.log) writelog(fp,&sdr->trk,&sdr->nav);
@@ -148,10 +151,10 @@ extern void *sdrthread(void *arg)
     if (sdrini.log) closelog(fp);
 
     if (sdr->flagacq) {
-        SDRPRINTF("SDR channel %s thread finished! Delay=%d [ms]\n",
+        debug_print("SDR channel %s thread finished! Delay=%d [ms]\n",
             sdr->satstr,(int)(bufflocnow-buffloc)/sdr->nsamp);
     } else {
-        SDRPRINTF("SDR channel %s thread finished!\n",sdr->satstr);
+        debug_print("SDR channel %s thread finished!\n",sdr->satstr);
     }
 
     return THRETVAL;

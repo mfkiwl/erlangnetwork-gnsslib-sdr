@@ -1,10 +1,12 @@
-/*------------------------------------------------------------------------------
-* sdr.h : constants, types and function prototypes
-
-* Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
-*-----------------------------------------------------------------------------*/
-#ifndef SDR_H
-#define SDR_H
+/**
+ * \file measurement_engine.h
+ * \brief constants, types and function for GNSS mesurement engine
+ * 
+ * \copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
+ * \copyright (C) 2020 Shu Wang <shuwang1@outlook.com>
+ * */
+#ifndef MEASUREMENT_ENGINE_H
+#define MEASUREMENT_ENGINE_H
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -17,6 +19,15 @@
 #include <time.h>
 #include <stdarg.h>
 #include <ctype.h>
+
+#if defined(DEBUG_ENABLED)
+#define DEBUG   1
+#else
+#define DEBUG   0
+#endif
+
+//#define debug_print(fmt, ...)   do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+#define debug_print(fmt, ...)   do{ if( DEBUG ) fprintf( stderr, "%s:%03d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__ ); } while (0)
 
 /* for windows ---------------------------------------------------------------*/
 #ifdef WIN32
@@ -143,6 +154,10 @@ extern "C" {
 #define ACQINTG_E1B   4                /* number of non-coherent integration */
 #define ACQINTG_B1I   10               /* number of non-coherent integration */
 #define ACQINTG_SBAS  10               /* number of non-coherent integration */
+
+#define ACQINTG_L2CM  10               /* number of non-coherent integration */
+
+
 #define ACQHBAND      7000             /* half width for doppler search (Hz) */
 #define ACQSTEP       200              /* doppler search frequency step (Hz) */
 #define ACQTH         3.0              /* acquisition threshold (peak ratio) */
@@ -391,7 +406,19 @@ typedef struct {
     int nfft;            /* number of FFT points */
     double cn0;          /* signal C/N0 */ 
     double peakr;        /* first/second peak ratio */
-} sdracq_t;
+
+    fftwf_complex *xcode[6];
+
+    uint8_t noncoherentintegration[3];
+
+    uint16_t coherencelen_code[3];
+    uint32_t fftlen[3];                 /* number of FFT points */
+    uint8_t fftlen_bit[3];
+
+    uint16_t numfreq[3];                /*! number of search frequency 0 .. 65,535 */
+    int16_t  *freq_4thHz[3];
+
+} acquisition_t;
 
 /* sdr tracking parameter struct */
 typedef struct {
@@ -520,7 +547,7 @@ typedef struct {
     sdreph_t sdreph;     /* sdr ephemeris struct */
     sdrlex_t lex;        /* QZSS LEX message struct */
     sdrsbas_t sbas;      /* SBAS message struct */
-} sdrnav_t;
+} navigation_t;
 
 /* sdr channel struct */
 typedef struct {
@@ -539,6 +566,7 @@ typedef struct {
     double foffset;      /* frequency offset (Hz) */
     short *code;         /* original code */
     cpx_t *xcode;        /* resampled code in frequency domain */
+    cpx_t *codex;        /* resampled code in frequency domain */
     int clen;            /* code length */
     double crate;        /* code chip rate (Hz) */
     double ctime;        /* code period (s) */
@@ -547,9 +575,9 @@ typedef struct {
     int nsamp;           /* number of samples in one code (doppler=0Hz) */
     int currnsamp;       /* current number of samples in one code */
     int nsampchip;       /* number of samples in one code chip (doppler=0Hz) */
-    sdracq_t acq;        /* acquisition struct */
+    acquisition_t acq;        /* acquisition struct */
     sdrtrk_t trk;        /* tracking struct */
-    sdrnav_t nav;        /* navigation struct */
+    navigation_t nav;        /* navigation struct */
     int flagacq;         /* acquisition flag */
     int flagtrk;         /* tracking flag */
 } sdrch_t;
@@ -641,9 +669,9 @@ extern void startsdr(void);
 #endif
 extern void quitsdr(sdrini_t *ini, int stop);
 #ifdef WIN32
-extern void sdrthread(void *arg);
+extern void statemachinethread(void *arg);
 #else
-extern void *sdrthread(void *arg);
+extern void *statemachinethread(void *arg);
 #endif
 
 /* sdrsync.c -----------------------------------------------------------------*/
@@ -674,10 +702,10 @@ extern void openhandles(void);
 extern void closehandles(void);
 extern int initpltstruct(sdrplt_t *acq, sdrplt_t *trk,sdrch_t *sdr);
 extern void quitpltstruct(sdrplt_t *acq, sdrplt_t *trk);
-extern void initacqstruct(int sys, int ctype, int prn, sdracq_t *acq);
+extern void initacqstruct(int sys, int ctype, int prn, acquisition_t *acq);
 extern void inittrkprmstruct(sdrtrk_t *trk);
 extern int inittrkstruct(int sat, int ctype, double ctime, sdrtrk_t *trk);
-extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav);
+extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav);
 extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype, 
                      int ftype, double f_cf, double f_sf, double f_if,
                      sdrch_t *sdr);
@@ -766,20 +794,20 @@ extern uint32_t merge_two_u(const uint32_t a, const uint32_t b, int n);
 extern int32_t merge_two_s(const int32_t a, const uint32_t b, int n);
 extern void bits2byte(int *bits, int nbits, int nbin, int right, uint8_t *bin);
 extern void interleave(const int *in, int row, int col, int *out);
-extern int checksync(double IP, double IPold, sdrnav_t *nav);
-extern int checkbit(double IP, int loopms, sdrnav_t *nav);
-extern void predecodefec(sdrnav_t *nav);
-extern int paritycheck(sdrnav_t *nav);
-extern int findpreamble(sdrnav_t *nav);
-extern int decodenav(sdrnav_t *nav);
+extern int checksync(double IP, double IPold, navigation_t *nav);
+extern int checkbit(double IP, int loopms, navigation_t *nav);
+extern void predecodefec(navigation_t *nav);
+extern int paritycheck(navigation_t *nav);
+extern int findpreamble(navigation_t *nav);
+extern int decodenav(navigation_t *nav);
 extern void check_hamming(int *hamming, int n, int parity, int m);
 
 /* sdrnav_gps/gal/glo.c/sbs.c ------------------------------------------------*/
-extern int decode_l1ca(sdrnav_t *nav);
-extern int decode_e1b(sdrnav_t *nav);
-extern int decode_g1(sdrnav_t *nav);
-extern int decode_b1i(sdrnav_t *nav);
-extern int decode_l1sbas(sdrnav_t *nav);
+extern int decode_l1ca(navigation_t *nav);
+extern int decode_e1b(navigation_t *nav);
+extern int decode_g1(navigation_t *nav);
+extern int decode_b1i(navigation_t *nav);
+extern int decode_l1sbas(navigation_t *nav);
 extern int paritycheck_l1ca(int *bits);
 
 /* sdrout.c ------------------------------------------------------------------*/
@@ -794,7 +822,7 @@ extern void tcpsvrclose(sdrsoc_t *soc);
 extern void sendrtcmnav(sdreph_t *eph, sdrsoc_t *soc);
 extern void sendrtcmobs(obsd_t *obsd, sdrsoc_t *soc, int nsat);
 extern void sendsbas(sdrsbas_t *sbas, sdrsoc_t *soc);
-extern void writelog(FILE *fp, sdrtrk_t *trk,sdrnav_t *nav);
+extern void writelog(FILE *fp, sdrtrk_t *trk,navigation_t *nav);
 extern FILE* createlog(char *filename, sdrtrk_t *trk);
 extern void closelog(FILE *fp);
 
@@ -834,4 +862,4 @@ extern void *lexthread(void *arg);
 #ifdef __cplusplus
 }
 #endif
-#endif /* SDR_H */
+#endif /* MEASUREMENT_ENGINE_H */

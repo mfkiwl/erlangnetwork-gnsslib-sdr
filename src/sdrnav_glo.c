@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 /* extract signed bits ---------------------------------------------------------
 * extract unsigned/signed bits from byte data (for GLONASS version)
@@ -193,10 +193,10 @@ extern int decode_flame_g1(const uint8_t *buff, sdreph_t *eph)
 }
 /* decode GLONASS navigation data ----------------------------------------------
 * decode GLONASS navigation data and extract ephemeris
-* args   : sdrnav_t *nav    I/O sdr navigation struct
+* args   : navigation_t *nav    I/O sdr navigation struct
 * return : int                  string number (1-5)
 *-----------------------------------------------------------------------------*/
-extern int decode_g1(sdrnav_t *nav)
+extern int decode_g1(navigation_t *nav)
 {
     int i,id=0,bits1[170],bits2[85];
     uint8_t bin[11]; /* 85/8 word bits */
@@ -218,7 +218,7 @@ extern int decode_g1(sdrnav_t *nav)
     id=decode_flame_g1(bin,&nav->sdreph);
 
     if (id<1||id>15)
-        SDRPRINTF("error: GLONASS word number sfn=%d\n",id);
+        debug_print("error: GLONASS word number sfn=%d\n",id);
 
     return id;
 }

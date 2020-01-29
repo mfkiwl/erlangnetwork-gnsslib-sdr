@@ -3,7 +3,7 @@
 *
 * Copyright (C) 2014 Taro Suzuki <gnsssdrlib@gmail.com>
 *-----------------------------------------------------------------------------*/
-#include "sdr.h"
+#include "measurement_engine.h"
 
 static fftwf_plan  plan=NULL;
 static fftwf_plan iplan=NULL; 
@@ -75,11 +75,11 @@ uint8_t lexcorr_fft(sdrch_t *sdr, const char *data, int dtype, double ti, int n,
     peakr=maxP/maxP2;
     
     if (peakr<1.5)
-        SDRPRINTF("error: peakr=%.1f\n",peakr);
+        debug_print("error: peakr=%.1f\n",peakr);
 
     /* message must be 0-255 */
     if (corri>255)
-        SDRPRINTF("error: corri=%05d codei=%06d cn0=%.1f\n",corri,codei,cn);
+        debug_print("error: corri=%05d codei=%06d cn0=%.1f\n",corri,codei,cn);
 
     free(P); sdrfree(dataR); sdrfree(dataI); sdrfree(dataQ); cpxfree(datax);
     return (uint8_t)corri;
@@ -132,7 +132,7 @@ void *lexthread(void * arg)
     /* FFT code generation */
     if (!(rcode=(short *)sdrmalloc(sizeof(short)*sdr->nsamp)) || 
         !(xcode=cpxmalloc(sdr->nsamp))) {
-            SDRPRINTF("error: initsdrch memory alocation\n");
+            debug_print("error: initsdrch memory alocation\n");
             return THRETVAL;
     }
     rescode(sdr->code,sdr->clen,0,0,sdr->ci,sdr->nsamp,rcode); /* resampled code */
@@ -141,7 +141,7 @@ void *lexthread(void * arg)
     sdrfree(rcode);
 
     sleepms(3000*sdrini.nch);
-    SDRPRINTF("**** LEX sdr thread start! ****\n");
+    debug_print("**** LEX sdr thread start! ****\n");
     do {
         /* wait event */
         mlock(hlexmtx);
@@ -163,11 +163,11 @@ void *lexthread(void * arg)
         time+=dt;
 
         if (dt>4000) 
-            SDRPRINTF("error: dt=%.1fms(must be < 4ms)\n",(double)dt/1000);
+            debug_print("error: dt=%.1fms(must be < 4ms)\n",(double)dt/1000);
 
         /* check computation time */
         if (cnt%250==0) {
-            //SDRPRINTF("time=%.2fms doppler=%.1f\n",(double)time/250000,dfreq);
+            //debug_print("time=%.2fms doppler=%.1f\n",(double)time/250000,dfreq);
             time=0;
         }
 
@@ -186,7 +186,7 @@ void *lexthread(void * arg)
             /* RS decode */
             nerr=decode_rs_ccsds(rsmsg,errloc,0,0);
             if (nerr!=0)
-                SDRPRINTF("RS correct %d symbols!\n",nerr);
+                debug_print("RS correct %d symbols!\n",nerr);
 
             if (sdrini.log) {
                 fprintf(fplexlog,"%f,%f,%d,%d\n",
@@ -200,7 +200,7 @@ void *lexthread(void * arg)
             memcpy(&sdrlex.msg[LENLEXPRE],&rsmsg[9],LENLEXRSK-9);
 
             mid=getbitu(sdrlex.msg,5*8,8);
-            SDRPRINTF("LEX Message Type ID=%d\n",mid);
+            debug_print("LEX Message Type ID=%d\n",mid);
 
             /* generate send buffer */
             sendbuf[0]=0xAA; /* sync code1 (see rcvlex.c) */
