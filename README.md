@@ -26,8 +26,6 @@ Features
     * Decoding navigation messages 
     * Pseudo-range & Doppler Measurement 
     * Carrier phase mesurements 
-* Support SSE2 hardware acceleration
-* Support hetergenous computing acceleration through GPGPUs
 * Real-time positioning with RTKLIB (<http://www.rtklib.com/>)
 * Observation data can be outputted in RINEX or RTCM format
 * Support following signals (tracking and decoding navigation message) 
