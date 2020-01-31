@@ -33,7 +33,6 @@ Features
     * GLONASS G1
     * Galileo E1B
     * BeiDou B1I
-    * QZSS L1CA/SAIF/LEX
     * SBAS L1
 * Support following front-ends for real-time positioning
     * NSL Stereo <http://www.nsl.eu.com/primo.html>
@@ -59,7 +58,6 @@ Directory and Files
         ./sdrcmn.c          Functions related to SIMD operation  
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
-        ./sdrlex.c          Functions related to QZSS LEX decoding  
         ./main.c            Main function  
         ./statemachine.c
         ./navigation.c      Functions related to navigation data  
