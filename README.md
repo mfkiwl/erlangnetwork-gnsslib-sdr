@@ -64,12 +64,12 @@ Directory and Files
         ./sdrlex.c          Functions related to QZSS LEX decoding  
         ./main.c            Main function  
         ./statemachine.c
-        ./sdrnav.c          Functions related to navigation data  
-        ./sdrnav_gps.c      Functions related to decoding GPS nav. data  
-        ./sdrnav_glo.c      Functions related to decoding GLONASS nav. data  
-        ./sdrnav_gal.c      Functions related to decoding Galileo nav. data  
-        ./sdrnav_bds.c      Functions related to decoding BeiDou nav. data  
-        ./sdrnav_sbs.c      Functions related to decoding SBAS nav. data  
+        ./navigation.c      Functions related to navigation data  
+        ./navigation_gps.c  Functions related to decoding GPS nav. data  
+        ./navigation_glo.c  Functions related to decoding GLONASS nav. data  
+        ./navigation_gal.c  Functions related to decoding Galileo nav. data  
+        ./navigation_bds.c  Functions related to decoding BeiDou nav. data  
+        ./navigation_sbs.c  Functions related to decoding SBAS nav. data  
         ./sdrout.c          Functions related to RINEX/RTCM outputs  
         ./sdrplot.c         Functions related to plot graph  
         ./sdrrcv.c          Functions related to receiving RF data  
