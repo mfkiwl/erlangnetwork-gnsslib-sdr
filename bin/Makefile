@@ -17,7 +17,7 @@ CC = gcc
 OPTIONS = -DFFTMTX
 
 OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
-     sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
+     sdrnav_gps.o sdrnav_glo.o sdrnav_sbs.o\
      sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o \
      sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
 
@@ -52,10 +52,6 @@ sdrnav_gps.o : $(SRC)/sdrnav_gps.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_gps.c
 sdrnav_glo.o : $(SRC)/sdrnav_glo.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_glo.c
-sdrnav_gal.o : $(SRC)/sdrnav_gal.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_gal.c
-sdrnav_bds.o : $(SRC)/sdrnav_bds.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_bds.c
 sdrnav_sbs.o : $(SRC)/sdrnav_sbs.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_sbs.c
 sdrplot.o: $(SRC)/sdrplot.c
@@ -98,8 +94,6 @@ sdrout.o : $(SRC)/sdr.h
 sdrnav.o : $(SRC)/sdr.h
 sdrnav_gps.o : $(SRC)/sdr.h
 sdrnav_glo.o : $(SRC)/sdr.h
-sdrnav_gal.o : $(SRC)/sdr.h
-sdrnav_bds.o : $(SRC)/sdr.h
 sdrnav_sbs.o : $(SRC)/sdr.h
 sdrplot.o: $(SRC)/sdr.h
 sdrrcv.o : $(SRC)/sdr.h
