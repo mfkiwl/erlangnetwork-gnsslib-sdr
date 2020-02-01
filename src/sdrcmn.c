@@ -24,18 +24,6 @@ extern int getfullpath(char *relpath, char *abspath)
     return 0;
 }
 
-/* calculation FFT number of points (2^bits samples) ---------------------------
-* calculation FFT number of points (round up)
-* args   : double x         I   number of points (not 2^bits samples)
-*          int    next      I   increment multiplier
-* return : int                  FFT number of points (2^bits samples)
-*-----------------------------------------------------------------------------*/
-extern int calcfftnum(double x, int next)
-{
-    int nn=(int) ( log(x)/log(2.0) + 0.5 )+next;
-    return (int) pow(2.0,nn);
-}
-
 /* complex FFT -----------------------------------------------------------------
 * cpx=fft(cpx)
 * args   : fftw_plan plan  I   fftw plan (NULL: create new plan)
@@ -63,35 +51,6 @@ extern void cpxfft( fftw_plan plan, fftw_complex *cpx, int n)
 #ifdef FFTMTX
         unmlock(hfftmtx);
 #endif
-}
-/* complex IFFT ----------------------------------------------------------------
-* cpx=ifft(cpx)
-* args   : fftw_plan plan  I   fftw plan (NULL: create new plan)
-*          cpx_t  *cpx      I/O input/output complex data
-*          int    n         I   number of input/output data
-* return : none
-*-----------------------------------------------------------------------------*/
-extern void cpxifft( fftw_plan plan, fftw_complex *cpx, int n )
-{
-#ifdef FFTMTX
-        mlock(hfftmtx);
-#endif
-
-    if( plan == NULL ) {
-        
-        fftw_plan_with_nthreads( NFFTTHREAD ); /* fft execute in multi threads */
-        plan = fftw_plan_dft_1d( n, cpx, cpx, FFTW_BACKWARD, FFTW_ESTIMATE );
-        fftw_execute_dft( plan, cpx, cpx ); /* fft */
-        fftw_destroy_plan( plan );
-
-    } else {
-        fftw_execute_dft( plan, cpx, cpx ); /* fft */
-    }
-
-#ifdef FFTMTX
-        unmlock(hfftmtx);
-#endif
-
 }
 /* convert short vector to complex vector --------------------------------------
 * cpx=complex(I,Q)

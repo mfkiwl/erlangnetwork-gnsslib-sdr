@@ -9,42 +9,6 @@
  * **/
 #include "measurement_engine.h"
 #define _DEBUG      0
-/* FFT convolution -------------------------------------------------------------
-* conv=sqrt(abs(ifft(fft(cpxa).*conj(cpxb))).^2) 
-* args   : fftw_plan plan  I   fftw plan (NULL: create new plan)
-*          fftw_plan iplan I   ifftw plan (NULL: create new plan)
-*          cpx_t  *cpxa     I   input complex data array
-*          cpx_t  *cpxb     I   input complex data array
-*          int    m         I   number of input data
-*          int    n         I   number of output data
-*          int    flagsum   I   cumulative sum flag (conv+=conv)
-*          double *conv     O   output convolution data
-* return : none
-*-----------------------------------------------------------------------------*/
-void _cpxconv( fftw_plan iplan, fftw_complex *cpxa, fftwf_complex *cpxb,
-                    int m, int n, int flagsum, double *conv)
-{
-    double *p, *q;
-    double real, m2 = (double) m*m;
-    int i;
-
-if(_DEBUG){ float *y = (float *) cpxa; printf( "codex=["); for( int x=0; x< 20; x++ ){ printf( " %.1e ", y[x] ); }; printf("\n"); }
-
-    for( i = 0, p = (double *) cpxa, q = (float *)cpxb; i<m; i++,p+=2,q+=2) {
-        real = -p[0]*q[0] - p[1]*q[1];
-        p[1] =  p[0]*q[1] - p[1]*q[0];
-        p[0] =  real;
-    }
-
-    cpxifft( iplan, cpxa, m ); /* ifft */
-
-    if (flagsum) { /* cumulative sum */
-        for( i=0, p=(double *)cpxa; i<n; i++,p+=2 ) conv[i] += ( p[0]*p[0] + p[1]*p[1] ) / m2;
-    } else {
-        for( i=0, p=(double *)cpxa; i<n; i++,p+=2 ) conv[i] = ( p[0]*p[0] + p[1]*p[1] ) /  m2;
-    }
-}
-
 /* parallel correlator ---------------------------------------------------------
 * fft based parallel correlator
 * args   : char   *data     I   sampling data vector (n x 1 or 2n x 1)
@@ -155,7 +119,7 @@ if(_DEBUG){ double *y = (double *) datax; printf( "m=%d datax_f=[", m); for( int
 #undef CSCALE
 }
 
-int checkacquisition( double *P, sdrch_t *sdr );
+int _checkacquisition( double *P, sdrch_t *sdr );
 
 /* sdr acquisition function ----------------------------------------------------
 * sdr acquisition function called from sdr channel thread

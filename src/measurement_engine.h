@@ -573,18 +573,13 @@ extern void initacqstruct(int sys, int ctype, int prn, acquisition_t *acq);
 extern void inittrkprmstruct(sdrtrk_t *trk);
 extern int inittrkstruct(int sat, int ctype, double ctime, sdrtrk_t *trk);
 extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav);
-extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype, 
-                     int ftype, double f_cf, double f_sf, double f_if,
-                     sdrch_t *sdr);
 extern void freesdrch(sdrch_t *sdr);
 
 /* sdrcmn.c ------------------------------------------------------------------*/
 extern int getfullpath(char *relpath, char *abspath);
 extern unsigned long tickgetus(void);
 extern void settimeout(struct timespec *timeout, int waitms);
-extern int calcfftnum(double x, int next);
 extern void cpxfft( fftw_plan plan, fftw_complex *cpx, int n );
-extern void cpxifft( fftw_plan plan, fftw_complex *cpx, int n );
 extern void cpxcpx( const short *II, const short *QQ, double scale, int n, fftw_complex *cpx);
 extern double maxvd(const double *data, int n, int exinds, int exinde, int *ind);
 extern double meanvd(const double *data, int n, int exinds, int exinde);

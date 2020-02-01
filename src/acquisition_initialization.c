@@ -107,7 +107,7 @@ int initialize_acqusition_struct(
 
      /* memory allocation */
     if( !(acq->freq = (double*) malloc(sizeof(double) * acq->numfreq[0] )) ) {
-        debug_print("error: initsdrch memory alocation\n"); return -1;
+        debug_print("error: acq->freq memory alocation\n"); return -1;
     }
 
     /* doppler search frequency */
