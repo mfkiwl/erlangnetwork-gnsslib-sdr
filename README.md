@@ -57,8 +57,6 @@ Directory and Files
         ./sdrnav.c          Functions related to navigation data  
         ./sdrnav_gps.c      Functions related to decoding GPS nav. data  
         ./sdrnav_glo.c      Functions related to decoding GLONASS nav. data  
-        ./sdrnav_gal.c      Functions related to decoding Galileo nav. data  
-        ./sdrnav_bds.c      Functions related to decoding BeiDou nav. data  
         ./sdrnav_sbs.c      Functions related to decoding SBAS nav. data  
         ./sdrout.c          Functions related to RINEX/RTCM outputs  
         ./sdrplot.c         Functions related to plot graph  
