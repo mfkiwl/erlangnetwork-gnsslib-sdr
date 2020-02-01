@@ -200,7 +200,7 @@ extern int checksync(double IP, double IPold, sdrnav_t *nav)
     int i,corr=0,maxi;
     
     /* BeiDou MEO/IGSO satellite (secondary code is NH20) */
-    if (nav->ctype==CTYPE_B1I&&nav->sdreph.prn>5) {
+    if ( nav->sdreph.prn> 5) {
         shiftdata(&nav->bitsync[0],&nav->bitsync[1],sizeof(int),nav->rate-1);
         nav->bitsync[nav->rate-1]=(IP<0?-1:1);
         
@@ -294,15 +294,12 @@ extern void predecodefec(sdrnav_t *nav)
 
     /* GPS/QZS L1CA / GLONASS G1 / Galileo E1B / BeiDou B1I */
     if (nav->ctype==CTYPE_L1CA ||
-        nav->ctype==CTYPE_G1   ||
-        nav->ctype==CTYPE_B1I  ||
-        nav->ctype==CTYPE_E1B) {
+        nav->ctype==CTYPE_G1 ) {
         /* FEC is not used before preamble detection */
         memcpy(nav->fbitsdec,nav->fbits,sizeof(int)*(nav->flen+nav->addflen));
     }
-    /* SBAS L1 / QZS L1SAIF */
-    if (nav->ctype==CTYPE_L1SAIF||
-        nav->ctype==CTYPE_L1SBAS) {
+    /* SBAS L1  */
+    if ( nav->ctype==CTYPE_L1SBAS) {
         /* 1/2 convolutional code */
         init_viterbi27_port(nav->fec,0);
         for (i=0;i<NAVFLEN_SBAS+NAVADDFLEN_SBAS;i++)
@@ -351,7 +348,7 @@ extern int paritycheck(sdrnav_t *nav)
         }
     }
     /* SBAS L1 / QZS SAIF parity check */
-    if (nav->ctype==CTYPE_L1SAIF||nav->ctype==CTYPE_L1SBAS) {
+    if ( nav->ctype==CTYPE_L1SBAS) {
         bits2byte(&bits[0],226,29,1,bin);
         bits2byte(&bits[226],24,3,0,pbin);
 
@@ -361,10 +358,8 @@ extern int paritycheck(sdrnav_t *nav)
             return 1;
         }
     }
-    /* Galileo E1B / GLONASS G1 */
-    if (nav->ctype==CTYPE_E1B ||
-        nav->ctype==CTYPE_B1I ||
-        nav->ctype==CTYPE_G1 ) {
+    /* GLONASS G1 */
+    if (nav->ctype==CTYPE_G1 ) {
         return 1;
     }
 
@@ -380,13 +375,13 @@ extern int findpreamble(sdrnav_t *nav)
     int i,corr=0;
 
     /* GPS/QZS L1CA / BeiDou B1I*/
-    if (nav->ctype==CTYPE_L1CA || nav->ctype==CTYPE_B1I) {
+    if (nav->ctype==CTYPE_L1CA ) {
         for (i=0;i<nav->prelen;i++)
             corr+=(nav->fbitsdec[nav->addflen+i]*nav->prebits[i]);
     }
     /* L1-SBAS/SAIF */
     /* check 2 preambles */
-    if (nav->ctype==CTYPE_L1SAIF||nav->ctype==CTYPE_L1SBAS) {
+    if ( nav->ctype==CTYPE_L1SBAS) {
         for (i=0;i<nav->prelen/2;i++) {
             corr+=(nav->fbitsdec[i    ]*nav->prebits[ 0+i]);
             corr+=(nav->fbitsdec[i+250]*nav->prebits[ 8+i]);
@@ -398,15 +393,7 @@ extern int findpreamble(sdrnav_t *nav)
         for (i=0;i<nav->prelen;i++)
             corr+=(nav->fbitsdec[nav->flen-nav->prelen+i]*nav->prebits[i]);
     }
-    /* Galileo E1B */
-    /* check preambles in two words */
-    if (nav->ctype==CTYPE_E1B) {
-        for (i=0;i<nav->prelen;i++)
-            corr+=(nav->fbitsdec[i]*nav->prebits[i]);
-        for (i=0;i<nav->prelen;i++)
-            corr+=(nav->fbitsdec[i+250]*nav->prebits[i]);
-        corr=(int)(corr/2);
-    }
+
     /* check preamble match */
     if (abs(corr)==nav->prelen) { /* preamble matched */
         nav->polarity=corr>0?1:-1; /* set bit polarity */
@@ -414,8 +401,7 @@ extern int findpreamble(sdrnav_t *nav)
         if (paritycheck(nav)) {
             return 1;
         } else {
-            // ????
-            if (nav->ctype==CTYPE_L1SAIF||nav->ctype==CTYPE_L1SBAS) {
+            if ( nav->ctype==CTYPE_L1SBAS) {
                 if (nav->polarity==1) nav->flagpol=ON;
             }
         }
@@ -434,19 +420,12 @@ extern int decodenav(sdrnav_t *nav)
         /* GPS/QZSS L1CA (LNAV) */
         case CTYPE_L1CA:
             return decode_l1ca(nav);
-        /* QZSS L1-SAIF/SBAS L1 */
-        case CTYPE_L1SAIF:
+        /* SBAS L1 */
         case CTYPE_L1SBAS:
             return decode_l1sbas(nav);
         /* GLONASS G1 */
         case CTYPE_G1:
             return decode_g1(nav);
-        /* Galileo E1B (I/NAV) */
-        case CTYPE_E1B:
-            return decode_e1b(nav);
-        /* BeiDou B1I */
-        case CTYPE_B1I:
-            return decode_b1i(nav);
         default:
             return -1;
     }

@@ -190,12 +190,10 @@ extern int readinifile(sdrini_t *ini)
     ini->outms   =readiniint(inifile,"OUTPUT","OUTMS");
     ini->rinex   =readiniint(inifile,"OUTPUT","RINEX");
     ini->rtcm    =readiniint(inifile,"OUTPUT","RTCM");
-    ini->lex     =readiniint(inifile,"OUTPUT","LEX");
     ini->sbas    =readiniint(inifile,"OUTPUT","SBAS");
     ini->log     =readiniint(inifile,"OUTPUT","LOG");
     readinistr(inifile,"OUTPUT","RINEXPATH",ini->rinexpath);
     ini->rtcmport=readiniint(inifile,"OUTPUT","RTCMPORT");
-    ini->lexport =readiniint(inifile,"OUTPUT","LEXPORT");
     ini->sbasport=readiniint(inifile,"OUTPUT","SBASPORT");
 
     /* spectrum setting */
@@ -204,14 +202,9 @@ extern int readinifile(sdrini_t *ini)
     /* sdr channel setting */
     for (i=0;i<sdrini.nch;i++) {
         if (sdrini.ctype[i]==CTYPE_L1CA ||
-            sdrini.ctype[i]==CTYPE_G1 ||
-            sdrini.ctype[i]==CTYPE_E1B ||
-            sdrini.ctype[i]==CTYPE_B1I
+            sdrini.ctype[i]==CTYPE_G1 
             ) {
             sdrini.nchL1++;
-        }
-        if (sdrini.ctype[i]==CTYPE_LEXS) {
-            sdrini.nchL6++;
         }
     }
     return 0;
@@ -244,10 +237,9 @@ extern int chk_initvalue(sdrini_t *ini)
     }
 
     /* checking port number input */
-    if ((ini->rtcmport<0||ini->rtcmport>32767) ||
-        (ini->lexport<0||ini->lexport>32767)) {
-            SDRPRINTF("error: wrong rtcm port rtcm:%d lex:%d\n",
-                ini->rtcmport,ini->lexport);
+    if ( ini->rtcmport<0||ini->rtcmport>32767 ) {
+            SDRPRINTF("error: wrong rtcm port rtcm:%d\n",
+                ini->rtcmport );
             return -1;
     }
 
@@ -293,10 +285,6 @@ extern void openhandles(void)
     initmlock(hfftmtx);
     initmlock(hpltmtx);
     initmlock(hobsmtx);
-    initmlock(hlexmtx);
-
-    /* events */
-    initevent(hlexeve);
 }
 /* close mutex and event -------------------------------------------------------
 * close mutex and event handles
@@ -311,10 +299,6 @@ extern void closehandles(void)
     delmlock(hfftmtx);
     delmlock(hpltmtx);
     delmlock(hobsmtx);
-    delmlock(hlexmtx);
-
-    /* events */
-    delevent(hlexeve);
 
 #ifdef WIN32
     hbuffmtx=NULL;
@@ -322,8 +306,6 @@ extern void closehandles(void)
     hfftmtx=NULL;
     hpltmtx=NULL;
     hobsmtx=NULL;
-    hlexmtx=NULL;
-    hlexeve=NULL;
 #endif
 }
 /* initialization plot struct --------------------------------------------------
@@ -404,9 +386,7 @@ extern void initacqstruct(int sys, int ctype, int prn, sdracq_t *acq)
 {
     if (ctype==CTYPE_L1CA) acq->intg=ACQINTG_L1CA;
     if (ctype==CTYPE_G1)   acq->intg=ACQINTG_G1;
-    if (ctype==CTYPE_E1B)  acq->intg=ACQINTG_E1B;
-    if (ctype==CTYPE_B1I)  acq->intg=ACQINTG_B1I;
-    if (ctype==CTYPE_L1SAIF||ctype==CTYPE_L1SBAS) acq->intg=ACQINTG_SBAS;
+    if (ctype==CTYPE_L1SBAS) acq->intg=ACQINTG_SBAS;
 
     acq->hband=ACQHBAND;
     acq->step=ACQSTEP;
@@ -486,15 +466,8 @@ extern int inittrkstruct(int sat, int ctype, double ctime, sdrtrk_t *trk)
 
     if (ctype==CTYPE_L1CA)   trk->loop=LOOP_L1CA;
     if (ctype==CTYPE_G1)     trk->loop=LOOP_G1;
-    if (ctype==CTYPE_E1B)    trk->loop=LOOP_E1B;
-    if (ctype==CTYPE_L1SAIF) trk->loop=LOOP_SBAS;
     if (ctype==CTYPE_L1SBAS) trk->loop=LOOP_SBAS;
-    if (ctype==CTYPE_B1I&&prn>5 ) trk->loop=LOOP_B1I;
-    if (ctype==CTYPE_B1I&&prn<=5) trk->loop=LOOP_B1IG;
-    
-    /* for LEX */
-    if (sys==SYS_QZS&&ctype==CTYPE_L1CA&&sdrini.nchL6) trk->loop=LOOP_LEX;
-    
+        
     /* loop interval (ms) */
     trk->loopms=trk->loop*ctimems;
 
@@ -548,7 +521,7 @@ extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav)
         for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
     }
     /* SBAS/QZS L1SAIF */
-    if (ctype==CTYPE_L1SAIF||ctype==CTYPE_L1SBAS) {
+    if ( ctype==CTYPE_L1SBAS) {
         nav->rate=NAVRATE_SBAS;
         nav->flen=NAVFLEN_SBAS;
         nav->addflen=NAVADDFLEN_SBAS;
@@ -583,58 +556,6 @@ extern int initnavstruct(int sys, int ctype, int prn, sdrnav_t *nav)
         /* overlay code (all 1) */
         nav->ocode=(short *)calloc(nav->rate,sizeof(short));
         for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-    }
-    /* Galileo E1B */
-    if (ctype==CTYPE_E1B) {
-        nav->rate=NAVRATE_E1B;
-        nav->flen=NAVFLEN_E1B;
-        nav->addflen=NAVADDFLEN_E1B;
-        nav->prelen=NAVPRELEN_E1B;
-        nav->sdreph.cntth=NAVEPHCNT_E1B;
-        nav->update=(int)(nav->flen*nav->rate);
-        memcpy(nav->prebits,pre_e1b,sizeof(int)*nav->prelen);
-
-        /* create fec */
-        if((nav->fec=create_viterbi27_port(120))==NULL) {
-            SDRPRINTF("error: create_viterbi27 failed\n");
-            return -1;
-        }
-        /* set polynomial */
-        set_viterbi27_polynomial_port(poly);
-
-        /* overlay code (all 1) */
-        nav->ocode=(short *)calloc(nav->rate,sizeof(short));
-        for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-    }
-    /* BeiDou B1I */
-    if (ctype==CTYPE_B1I) {
-        /* MEO/IGSO (D1 NAV) */
-        if (prn>5) {
-            nav->rate=NAVRATE_B1I;
-            nav->flen=NAVFLEN_B1I;
-            nav->addflen=NAVADDFLEN_B1I;
-            nav->prelen=NAVPRELEN_B1I;
-            nav->sdreph.cntth=NAVEPHCNT_B1I;
-            nav->update=(int)(nav->flen*nav->rate);
-            memcpy(nav->prebits,pre_b1i,sizeof(int)*nav->prelen);
-            
-            /* secondary code generation */
-            nav->ocode=gencode(-1,CTYPE_NH20,NULL,NULL);
-
-        /* GEO (D2 NAV) */
-        } else {
-            nav->rate=NAVRATE_B1IG;
-            nav->flen=NAVFLEN_B1IG;
-            nav->addflen=NAVADDFLEN_B1IG;
-            nav->prelen=NAVPRELEN_B1IG;
-            nav->sdreph.cntth=NAVEPHCNT_B1IG;
-            nav->update=(int)(nav->flen*nav->rate);
-            memcpy(nav->prebits,pre_b1i,sizeof(int)*nav->prelen);
-
-            /* overlay code (all 1) */
-            nav->ocode=(short *)calloc(nav->rate,sizeof(short));
-            for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-        }
     }
 
     if (!(nav->bitsync= (int *)calloc(nav->rate,sizeof(int))) || 
@@ -698,9 +619,6 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
         sdr->f_cf=f_cf; /* carrier frequency */
         sdr->foffset=0.0; /* frequency offset */
     }
-
-    /* for BeiDou B1I */
-    if (ctype==CTYPE_B1I) sdr->nsampchip*=2; /* for BOC code */
 
     /* acqisition struct */
     initacqstruct(sys,ctype,prn,&sdr->acq);

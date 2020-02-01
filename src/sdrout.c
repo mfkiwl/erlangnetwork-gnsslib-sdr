@@ -307,24 +307,12 @@ extern void sendrtcmnav(sdreph_t *sdreph, sdrsoc_t *soc)
         if (sys==SYS_GPS)       gen_rtcm3(&rtcm,1019,0); /* rtcm generation */
         else if (sys==SYS_QZS)  gen_rtcm3(&rtcm,1044,0); /* rtcm generation */
         break;
-    /* Galileo E1B (INAV) navigation data */
-    case CTYPE_E1B:
-        rtcm.ephsat=sdreph->eph.sat;
-        rtcm.nav.eph[rtcm.ephsat-1]=sdreph->eph;
-        gen_rtcm3(&rtcm,1045,0); /* rtcm generation */
-        break;
     /* GLONASS G1 navigation data */
     case CTYPE_G1:
         satsys(sdreph->geph.sat,&prn);
         rtcm.ephsat=sdreph->geph.sat;
         rtcm.nav.geph[prn-1]=sdreph->geph;
         gen_rtcm3(&rtcm,1020,0); /* rtcm generation */
-        break;
-    /* BeiDou B1I navigation data (note: using original rtcm format) */
-    case CTYPE_B1I:
-        rtcm.ephsat=sdreph->eph.sat;
-        rtcm.nav.eph[rtcm.ephsat-1]=sdreph->eph;
-        gen_rtcm3(&rtcm,1047,0); /* rtcm generation */
         break;
     }
     /* tcp send */

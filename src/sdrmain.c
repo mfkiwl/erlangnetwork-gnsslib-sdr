@@ -20,8 +20,6 @@ mlock_t hreadmtx;
 mlock_t hfftmtx;
 mlock_t hpltmtx;
 mlock_t hobsmtx;
-mlock_t hlexmtx;
-event_t hlexeve;
 
 /* sdr structs */
 sdrini_t sdrini={0};
@@ -146,19 +144,8 @@ extern void startsdr(void) /* call as function */
     for (i=0;i<sdrini.nch;i++) {
         /* GPS/QZS/GLO/GAL/CMP L1 */
         if (sdrch[i].ctype==CTYPE_L1CA  || sdrch[i].ctype==CTYPE_G1  ||
-            sdrch[i].ctype==CTYPE_E1B   || sdrch[i].ctype==CTYPE_B1I ||
-            sdrch[i].ctype==CTYPE_L1SBAS|| sdrch[i].ctype==CTYPE_L1SAIF)
+            sdrch[i].ctype==CTYPE_L1SBAS )
             cratethread(sdrch[i].hsdr,sdrthread,&sdrch[i]);
-        /* QZSS LEX */
-        if (sdrch[i].sys==SYS_QZS&&sdrch[i].ctype==CTYPE_LEXS) {
-            sdrini.nchL6++;
-            cratethread(sdrch[i].hsdr,lexthread,&sdrch[i]);
-
-            /* create QZSS L1CA channel */
-            initsdrch(sdrini.nch+1,SYS_QZS,193,CTYPE_L1CA,DTYPEI,FTYPE1,
-               sdrini.f_cf[0],sdrini.f_sf[0],sdrini.f_if[0],&sdrch[sdrini.nch]);
-            cratethread(sdrch[sdrini.nch].hsdr,sdrthread,&sdrch[sdrini.nch]);
-        }
     }
 #ifndef GUI
     /* sdr spectrum analyzer */
@@ -310,10 +297,6 @@ extern void *sdrthread(void *arg)
                             sizeof(double)*(sdr->trk.corrn*2+1));
                         plotthread(&plttrk);
                     }
-                    
-                    /* LEX thread */
-                    if (sdrini.nchL6!=0&&sdr->no==sdrini.nch+1&&loopcnt>250) 
-                        setevent(hlexeve);
 
                     loopcnt++;
                 }
@@ -331,9 +314,6 @@ extern void *sdrthread(void *arg)
         }
         sdr->trk.buffloc=buffloc;
     }
-    
-    if (sdrini.nchL6!=0&&sdr->no==sdrini.nch+1) 
-        setevent(hlexeve);
     
     /* plot termination */
     quitpltstruct(&pltacq,&plttrk);

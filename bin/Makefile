@@ -18,7 +18,7 @@ OPTIONS = -DFFTMTX
 
 OBS= sdrmain.o sdrcmn.o sdracq.o sdrcode.o sdrinit.o sdrnav.o\
      sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
-     sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o sdrlex.o\
+     sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o \
      sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
 
 LIBS = -lrtlsdr
@@ -29,7 +29,7 @@ OBS += rtlsdr.o convenience.o
 CFLAGS=-Wall $(INCLUDE) $(OPTIONS) -g
 LDLIBS=-lm -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
 
-BIN= gnss-sdrcli
+BIN= erlang-gnss
 $(BIN): $(OBS)
 	 $(CC) -o $(BIN) $(OBS) $(CFLAGS) $(LDLIBS)
 	 @cp $(BIN) ../test
@@ -66,8 +66,6 @@ sdrspec.o: $(SRC)/sdrspec.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrspec.c
 sdrtrk.o : $(SRC)/sdrtrk.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrtrk.c
-sdrlex.o : $(SRC)/sdrlex.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrlex.c
 sdrsync.o : $(SRC)/sdrsync.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrsync.c
 rtkcmn.o   : $(RTKLIB)/src/rtkcmn.c
@@ -107,7 +105,6 @@ sdrplot.o: $(SRC)/sdr.h
 sdrrcv.o : $(SRC)/sdr.h
 sdrspec.o: $(SRC)/sdr.h
 sdrtrk.o : $(SRC)/sdr.h
-sdrlex.o : $(SRC)/sdr.h
 sdrsync.o: $(SRC)/sdr.h
 rtkcmn.o : $(SRC)/sdr.h
 rtcm.o: $(SRC)/sdr.h

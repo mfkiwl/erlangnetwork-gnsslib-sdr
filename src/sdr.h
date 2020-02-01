@@ -151,11 +151,7 @@ extern "C" {
 /* tracking setting */
 #define LOOP_L1CA     10               /* loop interval */
 #define LOOP_G1       10               /* loop interval */
-#define LOOP_E1B      1                /* loop interval */
-#define LOOP_B1I      10               /* loop interval */
-#define LOOP_B1IG     2                /* loop interval */
 #define LOOP_SBAS     2                /* loop interval */
-#define LOOP_LEX      4                /* loop interval */
 
 /* navigation parameter */
 #define NAVSYNCTH       50             /* navigation frame synch. threshold */
@@ -210,15 +206,8 @@ extern "C" {
 #define CTYPE_L1CP    2                /* GPS/QZSS L1C Pilot */
 #define CTYPE_L1CD    3                /* GPS/QZSS L1C Data */
 #define CTYPE_L1CO    4                /* GPS/QZSS L1C overlay */
-#define CTYPE_E1B     9                /* Galileo E1B (Data) */
-#define CTYPE_E1C     10               /* Galileo E1C (Pilot) */
-#define CTYPE_E1CO    15               /* Galileo E1C overlay */
-#define CTYPE_G1      20               /* GLONASS G1 */
-#define CTYPE_B1I     22               /* BeiDou B1I */
-#define CTYPE_LEXS    24               /* QZSS LEX short */
-#define CTYPE_LEXL    25               /* QZSS LEX long */
-#define CTYPE_L1SAIF  26               /* QZSS L1 SAIF */
 #define CTYPE_L1SBAS  27               /* SBAS compatible L1CA */
+#define CTYPE_G1      20               /* GLONASS G1 */
 #define CTYPE_NH10    28               /* 10 bit Neuman-Hoffman code */
 #define CTYPE_NH20    29               /* 20 bit Neuman-Hoffman code */
 
@@ -247,18 +236,7 @@ extern "C" {
 #define SPEC_PLT_MW   100              /* margin (pixel) */
 #define SPEC_PLT_MH   0                /* margin (pixel) */
 
-/* QZSS LEX setting */
-#define DSAMPLEX      12               /* L1CA-LEX DCB (sample) */
-#define LEXMS         4                /* LEX short length (ms) */
-#define LENLEXPRE     4                /* LEX preamble length (byte) */
-#define LENLEXMSG     250              /* LEX message length (byte) */
-#define LENLEXRS      255              /* LEX RS data length (byte) */
-#define LENLEXRSK     223              /* LEX RS K (byte) */
-#define LENLEXRSP     (LENLEXRS-LENLEXRSK) /* LEX RS parity length (byte) */
-#define LENLEXERR     (LENLEXRSP/2)    /* RS max error correction len (byte) */
-#define LENLEXRCV     (8+LENLEXMSG-LENLEXRSP) /* LEX transmitting length */
-
-/* SBAS/QZSS L1-SAIF setting */
+/* SBAS setting */
 #define LENSBASMSG    32               /* SBAS message length 150/8 (byte) */
 #define LENSBASNOV    80               /* message length in NovAtel format */
 
@@ -324,12 +302,10 @@ typedef struct {
     int outms;           /* output interval (ms) */
     int rinex;           /* rinex output flag */
     int rtcm;            /* rtcm output flag */
-    int lex;             /* QZSS LEX output flag */
     int sbas;            /* SBAS/QZSS L1SAIF output flag */
     int log;             /* tracking log output flag */
     char rinexpath[1024];/* rinex output path */
     int rtcmport;        /* rtcm TCP/IP port */
-    int lexport;         /* LEX TCP/IP port */
     int sbasport;        /* SBAS/L1-SAIF TCP/IP port */
     int trkcorrn;        /* number of correlation points */
     int trkcorrd;        /* interval of correlation points (sample) */
@@ -456,11 +432,6 @@ typedef struct {
     unsigned int f1p4,cucp5,ep6,cicp7,i0p8,OMGdp9,omgp10;
 } sdreph_t;
 
-/* sdr LEX struct */
-typedef struct {
-    unsigned char msg[LENLEXMSG]; /* LEX message (250bytes/s) */
-} sdrlex_t;
-
 /* sdr SBAS struct */
 typedef struct {
     unsigned char msg[LENSBASMSG]; /* SBAS message (250bits/s) */
@@ -504,7 +475,6 @@ typedef struct {
     int flagtow;         /* first subframe found flag */
     int flagdec;         /* navigation data decoded flag */
     sdreph_t sdreph;     /* sdr ephemeris struct */
-    sdrlex_t lex;        /* QZSS LEX message struct */
     sdrsbas_t sbas;      /* SBAS message struct */
 } sdrnav_t;
 
@@ -581,7 +551,6 @@ typedef struct {
     obsd_t *obsd;        /* observation struct (defined in rtklib.h) */
     rnxopt_t opt;        /* rinex option struct (defined in rtklib.h) */
     sdrsoc_t soc_rtcm;   /* sdr socket struct for rtcm output */
-    sdrsoc_t soc_lex;    /* sdr socket struct for lex output */
     sdrsoc_t soc_sbas;   /* sdr socket struct for sbas output */
     char rinexobs[1024]; /* rinex observation file name */
     char rinexnav[1024]; /* rinex navigation file name */
@@ -608,8 +577,6 @@ extern mlock_t hreadmtx;      /* buffloc access mutex */
 extern mlock_t hfftmtx;       /* fft function mutex */
 extern mlock_t hpltmtx;       /* plot function mutex */
 extern mlock_t hobsmtx;       /* observation data access mutex */
-extern mlock_t hlexmtx;       /* QZSS LEX mutex */
-extern event_t hlexeve;       /* QZSS LEX event */
 
 extern sdrini_t sdrini;       /* sdr initialization struct */
 extern sdrstat_t sdrstat;     /* sdr state struct */
@@ -809,13 +776,6 @@ extern void calchistgram(char *data, int dtype, int n, double *xI, double *yI,
 extern void hanning(int n, float *win);
 extern int spectrumanalyzer(const char *data, int dtype, int n, double f_sf, 
                             int nfft, double *freq, double *pspec);
-
-/* sdrlex.c ------------------------------------------------------------------*/
-#ifdef WIN32
-extern void lexthread(void *arg);
-#else
-extern void *lexthread(void *arg);
-#endif
 
 #ifdef __cplusplus
 }
