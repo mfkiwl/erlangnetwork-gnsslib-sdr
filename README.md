@@ -55,7 +55,7 @@ Directory and Files
         ./acquisition_initialization.c
         ./tracking.c        Functions related to signal tracking
         ./tracking_initialization.c
-        ./sdrcmn.c          Functions related to SIMD operation  
+        ./sdrcmn.c          Functions related to common and shared operations  
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
         ./main.c            Main function  
