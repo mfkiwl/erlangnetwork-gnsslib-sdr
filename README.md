@@ -53,7 +53,7 @@ Directory and Files
     ./src                   Library source codes  
         ./sdr.h             Library header file  
         ./sdracq.c          Functions related to signal acquisition  
-        ./sdrcmn.c          Functions related to SIMD operation  
+        ./sdrcmn.c          Functions related to common and shared operations  
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
         ./sdrlex.c          Functions related to QZSS LEX decoding  
