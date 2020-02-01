@@ -83,6 +83,6 @@ Directory and Files
 
 License
 -------------------------------------------------------------------------------
-Private Uses are permitted but commercial uses shall be licensed. See LICENSE file.  
+Private Uses are generally permitted but commercial uses SHALL be licensed. See LICENSE file or inquir for details.  
 
 Generally speaking, a dual-license is applied here.  Creative Common License is applied in the first priority.  If a certain clause of the creative common license is inapplicable due to related law and regulations, the corresponding clause from GPL 3.0 license will be applied.  
