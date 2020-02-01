@@ -16,7 +16,7 @@
 *          sdrtrk_t *trk    I/0 tracking struct
 * return : int                  0:okay -1:error
 *-----------------------------------------------------------------------------*/
-int initialize_tracking_structure( int sat, int ctype, double ctime, sdrtrk_t *trk )
+extern int initialize_tracking_structure( int sat, int ctype, double ctime, sdrtrk_t *trk )
 {
 
     int i,prn;
@@ -54,15 +54,8 @@ int initialize_tracking_structure( int sat, int ctype, double ctime, sdrtrk_t *t
 
     if (ctype==CTYPE_L1CA)   trk->loop=LOOP_L1CA;
     if (ctype==CTYPE_G1)     trk->loop=LOOP_G1;
-    if (ctype==CTYPE_E1B)    trk->loop=LOOP_E1B;
-    if (ctype==CTYPE_L1SAIF) trk->loop=LOOP_SBAS;
     if (ctype==CTYPE_L1SBAS) trk->loop=LOOP_SBAS;
-    if (ctype==CTYPE_B1I&&prn>5 ) trk->loop=LOOP_B1I;
-    if (ctype==CTYPE_B1I&&prn<=5) trk->loop=LOOP_B1IG;
-    
-    /* for LEX */
-    if (sys==SYS_QZS&&ctype==CTYPE_L1CA&&sdrini.nchL6) trk->loop=LOOP_LEX;
-    
+       
     /* loop interval (ms) */
     trk->loopms=trk->loop*ctimems;
 
@@ -85,7 +78,7 @@ int initialize_tracking_structure( int sat, int ctype, double ctime, sdrtrk_t *t
 *          navigation_t *nav    I/0 navigation struct
 * return : int                  0:okay -1:error
 *-----------------------------------------------------------------------------*/
-int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *nav)
+extern int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *nav)
 {
     int i;
     int pre_l1ca[8]= { 1,-1,-1,-1, 1,-1, 1, 1}; /* L1CA preamble*/
@@ -96,7 +89,7 @@ int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *n
     int pre_b1i[11]= {-1,-1,-1, 1, 1, 1,-1, 1, 1,-1, 1}; /* B1I preamble */
     int pre_sbs[24]= { 1,-1, 1,-1, 1, 1,-1,-1,-1, 1,
                        1,-1,-1, 1,-1, 1,-1,-1, 1, 1,
-                       1 -1,-1, 1}; /* SBAS L1/QZS L1SAIF preamble */
+                       1 -1,-1, 1}; /* SBAS L1 preamble */
 
     int poly[2]={V27POLYA,V27POLYB};
 
@@ -105,7 +98,7 @@ int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *n
     nav->sdreph.prn=prn;
     nav->sdreph.eph.iodc=-1;
 
-    /* GPS/QZS L1CA */
+    /* GPS L1CA */
     if (ctype==CTYPE_L1CA) {
         nav->rate=NAVRATE_L1CA;
         nav->flen=NAVFLEN_L1CA;
@@ -119,8 +112,8 @@ int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *n
         nav->ocode=(short *)calloc(nav->rate,sizeof(short));
         for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
     }
-    /* SBAS/QZS L1SAIF */
-    if (ctype==CTYPE_L1SAIF||ctype==CTYPE_L1SBAS) {
+    /* SBAS */
+    if( ctype==CTYPE_L1SBAS ) {
         nav->rate=NAVRATE_SBAS;
         nav->flen=NAVFLEN_SBAS;
         nav->addflen=NAVADDFLEN_SBAS;
@@ -156,59 +149,6 @@ int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *n
         nav->ocode=(short *)calloc(nav->rate,sizeof(short));
         for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
     }
-    /* Galileo E1B */
-    if (ctype==CTYPE_E1B) {
-        nav->rate=NAVRATE_E1B;
-        nav->flen=NAVFLEN_E1B;
-        nav->addflen=NAVADDFLEN_E1B;
-        nav->prelen=NAVPRELEN_E1B;
-        nav->sdreph.cntth=NAVEPHCNT_E1B;
-        nav->update=(int)(nav->flen*nav->rate);
-        memcpy(nav->prebits,pre_e1b,sizeof(int)*nav->prelen);
-
-        /* create fec */
-        if((nav->fec=create_viterbi27_port(120))==NULL) {
-            debug_print("error: create_viterbi27 failed\n");
-            return -1;
-        }
-        /* set polynomial */
-        set_viterbi27_polynomial_port(poly);
-
-        /* overlay code (all 1) */
-        nav->ocode=(short *)calloc(nav->rate,sizeof(short));
-        for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-    }
-    /* BeiDou B1I */
-    if (ctype==CTYPE_B1I) {
-        /* MEO/IGSO (D1 NAV) */
-        if (prn>5) {
-            nav->rate=NAVRATE_B1I;
-            nav->flen=NAVFLEN_B1I;
-            nav->addflen=NAVADDFLEN_B1I;
-            nav->prelen=NAVPRELEN_B1I;
-            nav->sdreph.cntth=NAVEPHCNT_B1I;
-            nav->update=(int)(nav->flen*nav->rate);
-            memcpy(nav->prebits,pre_b1i,sizeof(int)*nav->prelen);
-            
-            /* secondary code generation */
-            nav->ocode=gencode(-1,CTYPE_NH20,NULL,NULL);
-
-        /* GEO (D2 NAV) */
-        } else {
-            nav->rate=NAVRATE_B1IG;
-            nav->flen=NAVFLEN_B1IG;
-            nav->addflen=NAVADDFLEN_B1IG;
-            nav->prelen=NAVPRELEN_B1IG;
-            nav->sdreph.cntth=NAVEPHCNT_B1IG;
-            nav->update=(int)(nav->flen*nav->rate);
-            memcpy(nav->prebits,pre_b1i,sizeof(int)*nav->prelen);
-
-            /* overlay code (all 1) */
-            nav->ocode=(short *)calloc(nav->rate,sizeof(short));
-            for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-        }
-    }
-
     if (!(nav->bitsync= (int *)calloc(nav->rate,sizeof(int))) || 
         !(nav->fbits=   (int *)calloc(nav->flen+nav->addflen,sizeof(int))) ||
         !(nav->fbitsdec=(int *)calloc(nav->flen+nav->addflen,sizeof(int)))) {

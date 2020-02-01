@@ -21,10 +21,13 @@ INCLUDE=-I$(SRC) -I$(RTKLIB)/src -I$(FEC)
 
 OPTIONS = -DFFTMTX -DDEBUG_ENABLED
 
-OBS= main.o statemachine.o sdrcmn.o acquisition.o sdrcode.o sdrinit.o sdrnav.o\
-     sdrnav_gps.o sdrnav_glo.o sdrnav_gal.o sdrnav_bds.o sdrnav_sbs.o\
-     sdrout.o sdrplot.o sdrrcv.o sdrspec.o sdrtrk.o sdrlex.o\
-     sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o
+OBS= main.o statemachine.o sdrcmn.o \
+	 sdrcode.o sdrinit.o \
+     navigation_gps.o navigation_glo.o navigation_sbs.o\
+     sdrout.o sdrplot.o sdrrcv.o sdrspec.o \
+     sdrsync.o rtkcmn.o rtcm.o rtcm2.o rtcm3.o rtcm3e.o rinex.o\
+	 acquisition_initialization.o acquisition.o\
+	 tracking_initialization.o tracking.o navigation.o
 
 ifeq ($(USE_STEREO),1)
 STEREO=../hardware/stereo
@@ -42,7 +45,6 @@ INCLUDE += -I$(RTLSDR) -I../src/rcv/rtl-sdr/include
 OBS += librtlsdr.o rtlsdr.o convenience.o tuner_e4k.o tuner_fc0012.o tuner_fc0013.o tuner_fc2580.o tuner_r82xx.o
 endif
 
-
 ifeq ($(USE_BLADERF),1)
 OPTIONS+=-DBLADERF
 LIBS+=-lbladeRF
@@ -53,15 +55,15 @@ endif
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	CC = gcc
-	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
-	LDLIBS = -lm -lrt -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
+	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS)
+	LDLIBS = -lm -lrt  -lfftw3f_threads -lfftw3_threads -lfftw3f -lfftw3 -lpthread $(LIBS) -lusb-1.0 -lfec 
 	BIN = erlang-gnss
 endif
 
 ifeq ($(UNAME_S),Darwin)
 	CC = gcc
-	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS) -g
-	LDLIBS = -lm -lfftw3f -lfftw3f_threads -lpthread $(LIBS) -lusb-1.0 -lfec 
+	CFLAGS = -O3 -march=native -mtune=native $(INCLUDE) $(OPTIONS)
+	LDLIBS = -lm -lfftw3f_threads -lfftw3_threads -lfftw3f -lfftw3 -lpthread $(LIBS) -lusb-1.0 -lfec 
 	BIN = erlang-gnss
 endif
 
@@ -74,36 +76,34 @@ statemachine.o : $(SRC)/statemachine.c
 	$(CC) -c $(CFLAGS) $(SRC)/statemachine.c
 sdrcmn.o : $(SRC)/sdrcmn.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrcmn.c
+acquisition_initialization.o : $(SRC)/acquisition_initialization.c
+	$(CC) -c $(CFLAGS) $(SRC)/acquisition_initialization.c
 acquisition.o : $(SRC)/acquisition.c
 	$(CC) -c $(CFLAGS) $(SRC)/acquisition.c
+tracking_initialization.o : $(SRC)/tracking_initialization.c
+	$(CC) -c $(CFLAGS) $(SRC)/tracking_initialization.c
 sdrcode.o: $(SRC)/sdrcode.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrcode.c
 sdrinit.o: $(SRC)/sdrinit.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrinit.c
 sdrout.o : $(SRC)/sdrout.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrout.c
-sdrnav.o : $(SRC)/sdrnav.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav.c
-sdrnav_gps.o : $(SRC)/sdrnav_gps.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_gps.c
-sdrnav_glo.o : $(SRC)/sdrnav_glo.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_glo.c
-sdrnav_gal.o : $(SRC)/sdrnav_gal.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_gal.c
-sdrnav_bds.o : $(SRC)/sdrnav_bds.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_bds.c
-sdrnav_sbs.o : $(SRC)/sdrnav_sbs.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrnav_sbs.c
+navigation.o : $(SRC)/navigation.c
+	$(CC) -c $(CFLAGS) $(SRC)/navigation.c
+navigation_gps.o : $(SRC)/navigation_gps.c
+	$(CC) -c $(CFLAGS) $(SRC)/navigation_gps.c
+navigation_glo.o : $(SRC)/navigation_glo.c
+	$(CC) -c $(CFLAGS) $(SRC)/navigation_glo.c
+navigation_sbs.o : $(SRC)/navigation_sbs.c
+	$(CC) -c $(CFLAGS) $(SRC)/navigation_sbs.c
 sdrplot.o: $(SRC)/sdrplot.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrplot.c
 sdrrcv.o : $(SRC)/sdrrcv.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrrcv.c
 sdrspec.o: $(SRC)/sdrspec.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrspec.c
-sdrtrk.o : $(SRC)/sdrtrk.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrtrk.c
-sdrlex.o : $(SRC)/sdrlex.c
-	$(CC) -c $(CFLAGS) $(SRC)/sdrlex.c
+tracking.o : $(SRC)/tracking.c
+	$(CC) -c $(CFLAGS) $(SRC)/tracking.c
 sdrsync.o : $(SRC)/sdrsync.c
 	$(CC) -c $(CFLAGS) $(SRC)/sdrsync.c
 rtkcmn.o   : $(RTKLIB)/src/rtkcmn.c
@@ -143,21 +143,20 @@ bladerf.o : $(BLADERF)/bladerf.c
 main.o: $(SRC)/measurement_engine.h
 statemachine.o: $(SRC)/measurement_engine.h
 sdrcmn.o : $(SRC)/measurement_engine.h
+acquisition_initialization.o : $(SRC)/measurement_engine.h
 acquisition.o : $(SRC)/measurement_engine.h
+tracking_initialization.o : $(SRC)/measurement_engine.h
+tracking.o : $(SRC)/measurement_engine.h
 sdrcode.o: $(SRC)/measurement_engine.h
 sdrinit.o: $(SRC)/measurement_engine.h
 sdrout.o : $(SRC)/measurement_engine.h
-sdrnav.o : $(SRC)/measurement_engine.h
-sdrnav_gps.o : $(SRC)/measurement_engine.h
-sdrnav_glo.o : $(SRC)/measurement_engine.h
-sdrnav_gal.o : $(SRC)/measurement_engine.h
-sdrnav_bds.o : $(SRC)/measurement_engine.h
-sdrnav_sbs.o : $(SRC)/measurement_engine.h
+navigation.o : $(SRC)/measurement_engine.h
+navigation_gps.o : $(SRC)/measurement_engine.h
+navigation_glo.o : $(SRC)/measurement_engine.h
+navigation_sbs.o : $(SRC)/measurement_engine.h
 sdrplot.o: $(SRC)/measurement_engine.h
 sdrrcv.o : $(SRC)/measurement_engine.h
 sdrspec.o: $(SRC)/measurement_engine.h
-sdrtrk.o : $(SRC)/measurement_engine.h
-sdrlex.o : $(SRC)/measurement_engine.h
 sdrsync.o: $(SRC)/measurement_engine.h
 rtkcmn.o : $(SRC)/measurement_engine.h
 rtcm.o: $(SRC)/measurement_engine.h

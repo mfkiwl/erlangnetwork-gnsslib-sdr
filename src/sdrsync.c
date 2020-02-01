@@ -12,11 +12,8 @@
 * note : this thread collects all data of sdr channel thread and compute pseudo
 *        range at every output timing.
 *-----------------------------------------------------------------------------*/
-#ifdef WIN32
-extern void syncthread(void * arg)
-#else
+
 extern void *syncthread(void * arg)
-#endif
 {
     int i,j,nsat,isat[MAXOBS],ind[MAXSAT]={0},refi;
     uint64_t sampref,sampbase,codei[MAXSAT],diffcnt,mincodei;

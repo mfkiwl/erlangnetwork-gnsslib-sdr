@@ -189,13 +189,11 @@ extern int readinifile( sdrini_t *ini, const char *inifile )
     ini->outms   =readiniint(inifile,"OUTPUT","OUTMS");
     ini->rinex   =readiniint(inifile,"OUTPUT","RINEX");
     ini->rtcm    =readiniint(inifile,"OUTPUT","RTCM");
-    ini->lex     =readiniint(inifile,"OUTPUT","LEX");
     ini->sbas    =readiniint(inifile,"OUTPUT","SBAS");
     ini->log     =readiniint(inifile,"OUTPUT","LOG");
     readinistr(inifile,"OUTPUT","RINEXPATH",ini->rinexpath);
     readinistr(inifile,"OUTPUT","LOGPATH",ini->logpath);        /* Added by Shu Wang, shuwang1@outlook.com, January 28, 2020*/
     ini->rtcmport=readiniint(inifile,"OUTPUT","RTCMPORT");
-    ini->lexport =readiniint(inifile,"OUTPUT","LEXPORT");
     ini->sbasport=readiniint(inifile,"OUTPUT","SBASPORT");
 
     /* spectrum setting */
@@ -204,14 +202,8 @@ extern int readinifile( sdrini_t *ini, const char *inifile )
     /* sdr channel setting */
     for (i=0;i<sdrini.nch;i++) {
         if (sdrini.ctype[i]==CTYPE_L1CA ||
-            sdrini.ctype[i]==CTYPE_G1 ||
-            sdrini.ctype[i]==CTYPE_E1B ||
-            sdrini.ctype[i]==CTYPE_B1I
-            ) {
+            sdrini.ctype[i]==CTYPE_G1 ) {
             sdrini.nchL1++;
-        }
-        if (sdrini.ctype[i]==CTYPE_LEXS) {
-            sdrini.nchL6++;
         }
     }
     return 0;
@@ -244,10 +236,8 @@ extern int chk_initvalue(sdrini_t *ini)
     }
 
     /* checking port number input */
-    if ((ini->rtcmport<0||ini->rtcmport>32767) ||
-        (ini->lexport<0||ini->lexport>32767)) {
-            debug_print("error: wrong rtcm port rtcm:%d lex:%d\n",
-                ini->rtcmport,ini->lexport);
+    if( ini->rtcmport<0||ini->rtcmport>32767 ) {
+            debug_print("error: wrong rtcm port rtcm:%d\n", ini->rtcmport );
             return -1;
     }
 
@@ -293,10 +283,7 @@ extern void openhandles(void)
     initmlock(hfftmtx);
     initmlock(hpltmtx);
     initmlock(hobsmtx);
-    initmlock(hlexmtx);
 
-    /* events */
-    initevent(hlexeve);
 }
 /* close mutex and event -------------------------------------------------------
 * close mutex and event handles
@@ -311,20 +298,6 @@ extern void closehandles(void)
     delmlock(hfftmtx);
     delmlock(hpltmtx);
     delmlock(hobsmtx);
-    delmlock(hlexmtx);
-
-    /* events */
-    delevent(hlexeve);
-
-#ifdef WIN32
-    hbuffmtx=NULL;
-    hreadmtx=NULL;
-    hfftmtx=NULL;
-    hpltmtx=NULL;
-    hobsmtx=NULL;
-    hlexmtx=NULL;
-    hlexeve=NULL;
-#endif
 }
 /* initialization plot struct --------------------------------------------------
 * set value to plot struct
@@ -339,7 +312,7 @@ extern int initpltstruct(sdrplt_t *acq, sdrplt_t *trk, sdrch_t *sdr)
 
     /* acquisition */
     if (sdrini.pltacq) {
-        setsdrplotprm(acq,PLT_SURFZ,sdr->acq.nfreq,sdr->nsamp,3,OFF,1,
+        setsdrplotprm(acq,PLT_SURFZ,sdr->acq.numfreq[0],sdr->nsamp,3,OFF,1,
             PLT_H,PLT_W,PLT_MH,PLT_MW,sdr->no);
         if (initsdrplot(acq)<0) return -1;
         settitle(acq,sdr->satstr);
@@ -404,31 +377,19 @@ extern void initacqstruct( int sys, int ctype, int prn, acquisition_t *acq )
 {
     switch( ctype ){
         case CTYPE_L1CA:
-            acq->intg = ACQINTG_L1CA;
+            acq->noncoherentintegration[0] = ACQINTG_L1CA;
             break;
         case CTYPE_G1:
-            acq->intg = ACQINTG_G1;
-            break;
-        case CTYPE_E1B:
-            acq->intg = ACQINTG_E1B;
-            break;
-        case CTYPE_B1I:
-            acq->intg = ACQINTG_B1I;
-            break;
-        case CTYPE_L1SAIF:
-        case CTYPE_L1SBAS:
-            acq->intg = ACQINTG_SBAS;
-            break;
-        case CTYPE_L2CM:
-            acq->intg = ACQINTG_L2CM;
+            acq->noncoherentintegration[0] = ACQINTG_G1;
             break;
         default:
-            acq->intg = ACQINTG_L1CA;
+            acq->noncoherentintegration[0] = ACQINTG_L1CA;
     }
 
     acq->hband=ACQHBAND;
     acq->step=ACQSTEP;
-    acq->nfreq=2*(ACQHBAND/ACQSTEP)+1;
+    acq->numfreq[0] = acq->numfreq[1] = acq->numfreq[2] = 2*(ACQHBAND/ACQSTEP)+1;
+    acq->coherencelen_code[0] = 2;
 }
 /* initialize tracking parameter struct ----------------------------------------
 * set value to tracking parameter struct
@@ -504,15 +465,8 @@ extern int inittrkstruct(int sat, int ctype, double ctime, sdrtrk_t *trk)
 
     if (ctype==CTYPE_L1CA)   trk->loop=LOOP_L1CA;
     if (ctype==CTYPE_G1)     trk->loop=LOOP_G1;
-    if (ctype==CTYPE_E1B)    trk->loop=LOOP_E1B;
-    if (ctype==CTYPE_L1SAIF) trk->loop=LOOP_SBAS;
     if (ctype==CTYPE_L1SBAS) trk->loop=LOOP_SBAS;
-    if (ctype==CTYPE_B1I&&prn>5 ) trk->loop=LOOP_B1I;
-    if (ctype==CTYPE_B1I&&prn<=5) trk->loop=LOOP_B1IG;
-    
-    /* for LEX */
-    if (sys==SYS_QZS&&ctype==CTYPE_L1CA&&sdrini.nchL6) trk->loop=LOOP_LEX;
-    
+        
     /* loop interval (ms) */
     trk->loopms=trk->loop*ctimems;
 
@@ -542,7 +496,7 @@ extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav)
     int pre_b1i[11]= {-1,-1,-1, 1, 1, 1,-1, 1, 1,-1, 1}; /* B1I preamble */
     int pre_sbs[24]= { 1,-1, 1,-1, 1, 1,-1,-1,-1, 1,
                        1,-1,-1, 1,-1, 1,-1,-1, 1, 1,
-                       1 -1,-1, 1}; /* SBAS L1/QZS L1SAIF preamble */
+                       1 -1,-1, 1}; /* SBAS L1 preamble */
 
     int poly[2]={V27POLYA,V27POLYB};
 
@@ -551,7 +505,7 @@ extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav)
     nav->sdreph.prn=prn;
     nav->sdreph.eph.iodc=-1;
 
-    /* GPS/QZS L1CA */
+    /* GPS L1CA */
     if (ctype==CTYPE_L1CA) {
         nav->rate=NAVRATE_L1CA;
         nav->flen=NAVFLEN_L1CA;
@@ -565,8 +519,8 @@ extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav)
         nav->ocode=(short *)calloc(nav->rate,sizeof(short));
         for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
     }
-    /* SBAS/QZS L1SAIF */
-    if (ctype==CTYPE_L1SAIF||ctype==CTYPE_L1SBAS) {
+    /* SBAS */
+    if( ctype==CTYPE_L1SBAS ) {
         nav->rate=NAVRATE_SBAS;
         nav->flen=NAVFLEN_SBAS;
         nav->addflen=NAVADDFLEN_SBAS;
@@ -602,59 +556,6 @@ extern int initnavstruct(int sys, int ctype, int prn, navigation_t *nav)
         nav->ocode=(short *)calloc(nav->rate,sizeof(short));
         for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
     }
-    /* Galileo E1B */
-    if (ctype==CTYPE_E1B) {
-        nav->rate=NAVRATE_E1B;
-        nav->flen=NAVFLEN_E1B;
-        nav->addflen=NAVADDFLEN_E1B;
-        nav->prelen=NAVPRELEN_E1B;
-        nav->sdreph.cntth=NAVEPHCNT_E1B;
-        nav->update=(int)(nav->flen*nav->rate);
-        memcpy(nav->prebits,pre_e1b,sizeof(int)*nav->prelen);
-
-        /* create fec */
-        if((nav->fec=create_viterbi27_port(120))==NULL) {
-            debug_print("error: create_viterbi27 failed\n");
-            return -1;
-        }
-        /* set polynomial */
-        set_viterbi27_polynomial_port(poly);
-
-        /* overlay code (all 1) */
-        nav->ocode=(short *)calloc(nav->rate,sizeof(short));
-        for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-    }
-    /* BeiDou B1I */
-    if (ctype==CTYPE_B1I) {
-        /* MEO/IGSO (D1 NAV) */
-        if (prn>5) {
-            nav->rate=NAVRATE_B1I;
-            nav->flen=NAVFLEN_B1I;
-            nav->addflen=NAVADDFLEN_B1I;
-            nav->prelen=NAVPRELEN_B1I;
-            nav->sdreph.cntth=NAVEPHCNT_B1I;
-            nav->update=(int)(nav->flen*nav->rate);
-            memcpy(nav->prebits,pre_b1i,sizeof(int)*nav->prelen);
-            
-            /* secondary code generation */
-            nav->ocode=gencode(-1,CTYPE_NH20,NULL,NULL);
-
-        /* GEO (D2 NAV) */
-        } else {
-            nav->rate=NAVRATE_B1IG;
-            nav->flen=NAVFLEN_B1IG;
-            nav->addflen=NAVADDFLEN_B1IG;
-            nav->prelen=NAVPRELEN_B1IG;
-            nav->sdreph.cntth=NAVEPHCNT_B1IG;
-            nav->update=(int)(nav->flen*nav->rate);
-            memcpy(nav->prebits,pre_b1i,sizeof(int)*nav->prelen);
-
-            /* overlay code (all 1) */
-            nav->ocode=(short *)calloc(nav->rate,sizeof(short));
-            for (i=0;i<nav->rate;i++) nav->ocode[i]=1;
-        }
-    }
-
     if (!(nav->bitsync= (int *)calloc(nav->rate,sizeof(int))) || 
         !(nav->fbits=   (int *)calloc(nav->flen+nav->addflen,sizeof(int))) ||
         !(nav->fbitsdec=(int *)calloc(nav->flen+nav->addflen,sizeof(int)))) {
@@ -717,22 +618,21 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
         sdr->foffset=0.0; /* frequency offset */
     }
 
-    /* for BeiDou B1I */
-    if (ctype==CTYPE_B1I) sdr->nsampchip*=2; /* for BOC code */
-
+debug_print("initialize acquisition\n");
     /* acqisition struct */
     initacqstruct(sys,ctype,prn,&sdr->acq);
-    sdr->acq.nfft=2*sdr->nsamp;//calcfftnum(2*sdr->nsamp,0);
+    sdr->acq.fftlen[0] = sdr->acq.coherencelen_code[0] * sdr->nsamp;//calcfftnum(2*sdr->nsamp,0);
 
     /* memory allocation */
-    if (!(sdr->acq.freq=(double*)malloc(sizeof(double)*sdr->acq.nfreq))) {
+    if (!(sdr->acq.freq=(double*)malloc(sizeof(double)*sdr->acq.numfreq[0]))) {
         debug_print("error: initsdrch memory alocation\n"); return -1;
     }
 
     /* doppler search frequency */
-    for (i=0;i<sdr->acq.nfreq;i++)
-        sdr->acq.freq[i]=sdr->f_if+((i-(sdr->acq.nfreq-1)/2)*sdr->acq.step)
-                            +sdr->foffset;
+    for( i=0; i<sdr->acq.numfreq[0]; i++ )
+        sdr->acq.freq[i] = ( (i-(sdr->acq.numfreq[0]-1)/2) * sdr->acq.step ) + sdr->f_if + sdr->foffset;
+
+debug_print("initialize acquisition\n");
 
     /* tracking struct */
     if (inittrkstruct(sdr->sat,ctype,sdr->ctime,&sdr->trk)<0) return -1;
@@ -742,17 +642,19 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
         return -1;
     }
     /* memory allocation */
-    if (!(rcode=(short *)sdrmalloc(sizeof(short)*sdr->acq.nfft)) || 
-        !(sdr->xcode=cpxmalloc(sdr->acq.nfft))) {
+    if (!(rcode=(short *)malloc(sizeof(short)*sdr->acq.fftlen[0])) || 
+        !(sdr->codex=fftw_malloc( sizeof(fftw_complex) * sdr->acq.fftlen[0] + 32 ) )) {
             debug_print("error: initsdrch memory alocation\n"); return -1;
     }
     /* other code generation */
-    for (i=0;i<sdr->acq.nfft;i++) rcode[i]=0; /* zero padding */
+    for (i=0;i<sdr->acq.fftlen[0];i++) rcode[i]=0; /* zero padding */
     rescode(sdr->code,sdr->clen,0,0,sdr->ci,sdr->nsamp,rcode); /* resampling */
-    cpxcpx(rcode,NULL,1.0,sdr->acq.nfft,sdr->xcode); /* FFT for acquisition */
-    cpxfft(NULL,sdr->xcode,sdr->acq.nfft);
+    cpxcpx(rcode,NULL,1.0,sdr->acq.fftlen[0],sdr->codex); /* FFT for acquisition */
+    cpxfft(NULL,sdr->codex,sdr->acq.fftlen[0]);
 
-    sdrfree(rcode);
+if( 1 ){ short *y = (short *) rcode; printf("\n%d rcode=", sdr->no); for(int x=0; x<80; x++) printf( " %d", y[x]  ); printf("\n"); }
+
+    free(rcode);
     return 0;
 }
 /* free sdr channel struct -----------------------------------------------------
@@ -763,7 +665,7 @@ extern int initsdrch(int chno, int sys, int prn, int ctype, int dtype,
 extern void freesdrch(sdrch_t *sdr)
 {
     free(sdr->code);
-    cpxfree(sdr->xcode);
+    fftw_free(sdr->codex);
     free(sdr->nav.fbits);
     free(sdr->nav.fbitsdec);
     free(sdr->nav.bitsync);

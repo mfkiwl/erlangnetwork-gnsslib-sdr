@@ -5,7 +5,7 @@
 *-----------------------------------------------------------------------------*/
 #include "measurement_engine.h"
 
-/* decode GPS/QZS navigation data (subframe 1) ---------------------------------
+/* decode GPS navigation data (subframe 1) ---------------------------------
 *
 * args   : uint8_t  *buff   I   navigation data bits
 *          sdreph_t *eph    I/O sdr ephemeris structure
@@ -37,7 +37,7 @@ void decode_subfrm1(const uint8_t *buff, sdreph_t *eph)
     /* subframe decode counter */
     eph->cnt++;
 }
-/* decode GPS/QZS navigation data (subframe 2) ---------------------------------
+/* decode GPS navigation data (subframe 2) ---------------------------------
 *
 * args   : uint8_t  *buff   I   navigation data bits
 *          sdreph_t *eph    I/O sdr ephemeris structure
@@ -67,7 +67,7 @@ void decode_subfrm2(const uint8_t *buff, sdreph_t *eph)
     /* subframe counter */
     eph->cnt++;
 }
-/* decode GPS/QZS navigation data (subframe 3) ---------------------------------
+/* decode GPS navigation data (subframe 3) ---------------------------------
 *
 * args   : uint8_t  *buff   I   navigation data bits
 *          sdreph_t *eph    I/O sdr ephemeris structure
@@ -94,7 +94,7 @@ void decode_subfrm3(const uint8_t *buff, sdreph_t *eph)
     /* subframe counter */
     eph->cnt++;
 }
-/* decode GPS/QZS navigation data (subframe 4) ---------------------------------
+/* decode GPS navigation data (subframe 4) ---------------------------------
 *
 * args   : uint8_t  *buff   I   navigation data bits
 *          sdreph_t *eph    I/O sdr ephemeris structure
@@ -104,7 +104,7 @@ void decode_subfrm4(const uint8_t *buff, sdreph_t *eph)
 {
     eph->tow_gpst=getbitu(buff,30,17)*6.0; /* transmission time of subframe */
 }
-/* decode GPS/QZS navigation data (subframe 5) ---------------------------------
+/* decode GPS navigation data (subframe 5) ---------------------------------
 *
 * args   : uint8_t  *buff   I   navigation data bits
 *          sdreph_t *eph    I/O sdr ephemeris structure
@@ -114,7 +114,7 @@ void decode_subfrm5(const uint8_t *buff, sdreph_t *eph)
 {
     eph->tow_gpst=getbitu(buff,30,17)*6.0; /* transmission time of subframe */
 }
-/* decode navigation data (GPS/QZS L1CA subframe) ------------------------------
+/* decode navigation data (GPS L1CA subframe) ------------------------------
 *
 * args   : uint8_t *buff    I   navigation data bits
 *          sdreph_t *eph    I/O sdr ephemeris structure
@@ -134,7 +134,7 @@ int decode_frame_l1ca(const uint8_t *buff, sdreph_t *eph)
     return id;
 }
 /* parity check ----------------------------------------------------------------
-* GPS/QZS L1CA parity check function
+* GPS L1CA parity check function
 * args   : int    *bits     I   navigation bits (2+30 bits)
 * return : int                  1:okay 0: wrong parity
 *-----------------------------------------------------------------------------*/
@@ -162,8 +162,8 @@ extern int paritycheck_l1ca(int *bits)
 
     return 0;
 }
-/* decode GPS/QZS L1CA navigation data -----------------------------------------
-* decode GPS/QZS L1CA navigation data and extract ephemeris
+/* decode GPS L1CA navigation data -----------------------------------------
+* decode GPS L1CA navigation data and extract ephemeris
 * args   : navigation_t *nav    I/O sdr navigation struct
 * return : int                  subframe ID (1-5)
 *-----------------------------------------------------------------------------*/

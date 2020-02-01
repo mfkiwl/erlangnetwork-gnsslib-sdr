@@ -17,9 +17,6 @@ extern int rcvinit(sdrini_t *ini)
     WSAStartup(MAKEWORD(1,0),&wsaData);
 #endif
 
-    /* FFT initialization */
-    fftwf_init_threads();
-
     sdrstat.buff=sdrstat.buff2=sdrstat.tmpbuff=NULL;
 
     switch (ini->fend) {

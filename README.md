@@ -31,8 +31,6 @@ Features
 * Support following signals (tracking and decoding navigation message) 
     * GPS L1CA
     * GLONASS G1
-    * Galileo E1B
-    * BeiDou B1I
     * SBAS L1
 * Support following front-ends for real-time positioning
     * NSL Stereo <http://www.nsl.eu.com/primo.html>
@@ -46,7 +44,6 @@ Directory and Files
     ./bin                   Executable APs for Windows  
         ./erlang-gnss       Real-time Erlang Network GNSS signal processing executable 
         ./gnss-sdrcli.ini   Configuration file for Erlang Network GNSS Applications
-        ./gnss_L2CM.ini  Configuration file for Erlang Network GNSS Applications
         ./Makefile          Makefile
     ./config                Directory of front-end configuration files  
     ./src                   Library source codes  
@@ -63,8 +60,6 @@ Directory and Files
         ./navigation.c      Functions related to navigation data  
         ./navigation_gps.c  Functions related to decoding GPS nav. data  
         ./navigation_glo.c  Functions related to decoding GLONASS nav. data  
-        ./navigation_gal.c  Functions related to decoding Galileo nav. data  
-        ./navigation_bds.c  Functions related to decoding BeiDou nav. data  
         ./navigation_sbs.c  Functions related to decoding SBAS nav. data  
         ./sdrout.c          Functions related to RINEX/RTCM outputs  
         ./sdrplot.c         Functions related to plot graph  
@@ -79,7 +74,11 @@ Directory and Files
         ./fftw3
     ./test                  Test data  
         ./data              Test IF data  
-        ./output            Default RINEX output directory  
+        ./output            Default RINEX output directory
+    ./output
+        ./*.nav
+        ./*.obs
+        ./*.csv
 
 
 License

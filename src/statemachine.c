@@ -16,20 +16,17 @@
 * note : This thread handles the acquisition and tracking of one of the signals. 
 *        The thread is created at startsdr function.
 *-----------------------------------------------------------------------------*/
-#define ACQSLEEP      2000             /* acquisition process interval (ms) */
+#define ACQSLEEP      200             /* acquisition process interval (ms) */
 
-#ifdef WIN32
-extern void statemachinethread(void *arg)
-#else
 extern void *statemachinethread(void *arg)
-#endif
 {
     sdrch_t *sdr=(sdrch_t*)arg;
     sdrplt_t pltacq={0},plttrk={0};
+    uint32_t nsamp = sdr->nsamp ;
     uint64_t buffloc=0,bufflocnow=0,cnt=0,loopcnt=0;
-    double *acqpower=NULL;
+    double *acqpower = NULL;
     FILE* fp=NULL;
-    char fname[100];
+    char fname[128];
     
     /* create tracking log file */
     if (sdrini.log) {
@@ -44,8 +41,8 @@ extern void *statemachinethread(void *arg)
     if (initpltstruct(&pltacq,&plttrk,sdr)<0) {
         sdrstat.stopflag=ON;
     }
-    sleepms(sdr->no*500);
-    debug_print("**** %s sdr thread %d start! ****\n",sdr->satstr,sdr->no);
+    sleepms( (sdr->no-1) *5000 + 500 );
+    debug_print("**** %s aquisition thread %02d coherence=%d fftlen=%d start! ****\n",sdr->satstr, sdr->no, sdr->acq.coherencelen_code[0], sdr->acq.fftlen[0] );
 
     sdr->flagacq = 0 ;
     while (!sdrstat.stopflag) {
@@ -54,15 +51,14 @@ extern void *statemachinethread(void *arg)
         if( sdr->flagacq < 1 ) {
 
             /* memory allocation */
-            acqpower = (double*) calloc( sizeof(double), sdr->nsamp * sdr->acq.nfreq );
+            if( acqpower == NULL ) {
+                acqpower = (double*) calloc( sizeof(double), nsamp * sdr->acq.numfreq[0] );
+            }else{
+                memset( acqpower, 0, sizeof(double) * nsamp * sdr->acq.numfreq[0] );
+            }
 
             /* fft correlation */
             buffloc = acquisition( sdr, acqpower );
-
-            if( acqpower!=NULL ){
-                free( acqpower );
-                acqpower == NULL;
-            }
         
         }
 
@@ -77,14 +73,21 @@ extern void *statemachinethread(void *arg)
 
         }else{
 
+            /* display acquisition results */
+            if( !sdr->flagtrk ) debug_print("%s, C/N0=%4.1f, peakr=%3.1f, codei=%5d, freq=%8.1f\n",
+                sdr->satstr,
+                sdr->acq.cn0,
+                sdr->acq.peakr,
+                sdr->acq.acqcodei,
+                sdr->acq.acqfreq - sdr->f_if - sdr->foffset );
+
             sdr->flagacq = sdr->flagacq > -3 ? -10 : ++(sdr->flagacq) ;
             sleepms( - sdr->flagacq * ACQSLEEP );
-        
         }
 
         /* tracking */
         if( sdr->flagacq > 0 ) {
-            bufflocnow=sdrtracking(sdr,buffloc,cnt);
+            bufflocnow=tracking(sdr,buffloc,cnt);
             if (sdr->flagtrk) {
                 
                 /* correlation output accumulation */
@@ -120,10 +123,6 @@ extern void *statemachinethread(void *arg)
                         plotthread(&plttrk);
                     }
                     
-                    /* LEX thread */
-                    if (sdrini.nchL6!=0&&sdr->no==sdrini.nch+1&&loopcnt>250) 
-                        setevent(hlexeve);
-
                     loopcnt++;
                 }
 
@@ -140,10 +139,7 @@ extern void *statemachinethread(void *arg)
         }
         sdr->trk.buffloc=buffloc;
     }
-    
-    if (sdrini.nchL6!=0&&sdr->no==sdrini.nch+1) 
-        setevent(hlexeve);
-    
+        
     /* plot termination */
     quitpltstruct(&pltacq,&plttrk);
 
@@ -152,7 +148,7 @@ extern void *statemachinethread(void *arg)
 
     if (sdr->flagacq) {
         debug_print("SDR channel %s thread finished! Delay=%d [ms]\n",
-            sdr->satstr,(int)(bufflocnow-buffloc)/sdr->nsamp);
+            sdr->satstr, (int) (bufflocnow-buffloc) / nsamp );
     } else {
         debug_print("SDR channel %s thread finished!\n",sdr->satstr);
     }

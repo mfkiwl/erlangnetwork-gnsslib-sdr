@@ -19,6 +19,7 @@
 #include <time.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <assert.h>
 
 #if defined(DEBUG_ENABLED)
 #define DEBUG   1
@@ -28,56 +29,6 @@
 
 //#define debug_print(fmt, ...)   do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 #define debug_print(fmt, ...)   do{ if( DEBUG ) fprintf( stderr, "%s:%03d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__ ); } while (0)
-
-/* for windows ---------------------------------------------------------------*/
-#ifdef WIN32
-
-#include <windows.h>
-#include <process.h>
-#include <shlwapi.h>
-#include <shlobj.h>
-#include <locale.h>
-#pragma comment(lib,"winmm.lib")
-#pragma comment(lib,"ws2_32.lib")
-#pragma comment(lib,"shell32.lib")
-#pragma comment(lib,"User32.lib")
-#pragma comment(lib,"fec/libfec.a")
-#pragma comment(lib,"fft/libfftw3f-3.lib")
-#pragma comment(lib,"usb/libusb.lib")
-#pragma comment(lib,"stereo/libnslstereo.a")
-#pragma comment(lib,"bladerf/bladeRF.lib")
-#pragma comment(lib,"rtlsdr/rtlsdr.lib")
-
-#include "fec/fec.h"
-#include "fft/fftw3.h"
-#include "rtklib/rtklib.h"
-#include "usb/lusb0_usb.h"
-#include "stereo/stereo.h"
-#include "gn3s/gn3s.h"
-#include "bladerf/libbladeRF.h"
-#include "../rcv/rtlsdr/rtl-sdr.h"
-
-#if defined(GUI)
-#include "../gui/gnss-sdrgui/maindlg.h"
-using namespace gnsssdrgui;
-#endif
-
-/* printf function */
-#if defined(GUI)
-#define SDRPRINTF(...) \
-    do { \
-    char str[1024]; \
-    sprintf(str,__VA_ARGS__);  \
-    maindlg^form=static_cast<maindlg^>(hform.Target); \
-    String^ strstr = gcnew String(str); \
-    form->mprintf(strstr); \
-    } while (0)
-#else
-#define SDRPRINTF printf
-#endif 
-
-/* for linux -----------------------------------------------------------------*/
-#else
 
 #include <pthread.h>
 #include <sys/socket.h>
@@ -100,10 +51,6 @@ using namespace gnsssdrgui;
 #ifdef RTLSDR
 #include "rtl-sdr.h"
 #endif
-
-#define SDRPRINTF printf
-
-#endif /* defined(WIN32) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -148,38 +95,29 @@ extern "C" {
 #define FILE_BUFFSIZE 65536            /* buffer size for post processing */
 
 /* acquisition setting */
-#define NFFTTHREAD    4                /* number of thread for executing FFT */
+#define NFFTTHREAD    4               /* number of thread for executing FFT */
 #define ACQINTG_L1CA  10               /* number of non-coherent integration */
 #define ACQINTG_G1    10               /* number of non-coherent integration */
-#define ACQINTG_E1B   4                /* number of non-coherent integration */
-#define ACQINTG_B1I   10               /* number of non-coherent integration */
 #define ACQINTG_SBAS  10               /* number of non-coherent integration */
 
-#define ACQINTG_L2CM  10               /* number of non-coherent integration */
-
-
-#define ACQHBAND      7000             /* half width for doppler search (Hz) */
+#define ACQHBAND      5000             /* half width for doppler search (Hz) */
 #define ACQSTEP       200              /* doppler search frequency step (Hz) */
 #define ACQTH         3.0              /* acquisition threshold (peak ratio) */
 
 /* tracking setting */
 #define LOOP_L1CA     10               /* loop interval */
 #define LOOP_G1       10               /* loop interval */
-#define LOOP_E1B      1                /* loop interval */
-#define LOOP_B1I      10               /* loop interval */
-#define LOOP_B1IG     2                /* loop interval */
 #define LOOP_SBAS     2                /* loop interval */
-#define LOOP_LEX      4                /* loop interval */
 
 /* navigation parameter */
 #define NAVSYNCTH       50             /* navigation frame synch. threshold */
-/* GPS/QZSS L1CA */
+/* GPS L1CA */
 #define NAVRATE_L1CA    20             /* length (multiples of ranging code) */
 #define NAVFLEN_L1CA    300            /* navigation frame data (bits) */
 #define NAVADDFLEN_L1CA 2              /* additional bits of frame (bits) */
 #define NAVPRELEN_L1CA  8              /* preamble bits length (bits) */
 #define NAVEPHCNT_L1CA  3              /* number of eph. contained frame */
-/* L1 SBAS/QZSS L1SAIF */
+/* L1 SBAS */
 #define NAVRATE_SBAS    2              /* length (multiples of ranging code) */
 #define NAVFLEN_SBAS    1500           /* navigation frame data (bits) */
 #define NAVADDFLEN_SBAS 12             /* additional bits of frame (bits) */
@@ -191,24 +129,6 @@ extern "C" {
 #define NAVADDFLEN_G1   0              /* additional bits of frame (bits) */
 #define NAVPRELEN_G1    30             /* preamble bits length (bits) */
 #define NAVEPHCNT_G1    5              /* number of eph. contained frame */
-/* Galileo E1B */
-#define NAVRATE_E1B     1              /* length (multiples of ranging code) */
-#define NAVFLEN_E1B     500            /* navigation frame data (bits) */
-#define NAVADDFLEN_E1B  0              /* additional bits of frame (bits) */
-#define NAVPRELEN_E1B   10             /* preamble bits length (bits) */
-#define NAVEPHCNT_E1B   5              /* number of eph. contained frame */
-/* BeiDou BI1 */
-#define NAVRATE_B1I     20             /* length (multiples of ranging code) */
-#define NAVFLEN_B1I     300            /* navigation frame data (bits) */
-#define NAVADDFLEN_B1I  0              /* additional bits of frame (bits) */
-#define NAVPRELEN_B1I   11             /* preamble bits length (bits) */
-#define NAVEPHCNT_B1I   3              /* number of eph. contained frame */
-/* BeiDou BI1(GEO satellite) */
-#define NAVRATE_B1IG    2              /* length (multiples of ranging code) */
-#define NAVFLEN_B1IG    300            /* navigation frame data (bits) */
-#define NAVADDFLEN_B1IG 0              /* additional bits of frame (bits) */
-#define NAVPRELEN_B1IG  11             /* preamble bits length (bits) */
-#define NAVEPHCNT_B1IG  10             /* number of eph. contained frame */
 
 /* observation data generation */
 #define PTIMING       68.802           /* pseudo range generation timing (ms) */
@@ -217,35 +137,14 @@ extern "C" {
 
 /* code generation parameter */
 #define MAXGPSSATNO   210              /* max satellite number */
-#define MAXGALSATNO   50               /* max satellite number */
-#define MAXCMPSATNO   37               /* max satellite number */
+
 /* code type */
-#define CTYPE_L1CA    1                /* GPS/QZSS L1C/A */
-#define CTYPE_L1CP    2                /* GPS/QZSS L1C Pilot */
-#define CTYPE_L1CD    3                /* GPS/QZSS L1C Data */
-#define CTYPE_L1CO    4                /* GPS/QZSS L1C overlay */
-#define CTYPE_L2CM    5                /* GPS/QZSS L2CM */
-#define CTYPE_L2CL    6                /* GPS/QZSS L2CL */
-#define CTYPE_L5I     7                /* GPS/QZSS L5I */
-#define CTYPE_L5Q     8                /* GPS/QZSS L5Q */
-#define CTYPE_E1B     9                /* Galileo E1B (Data) */
-#define CTYPE_E1C     10               /* Galileo E1C (Pilot) */
-#define CTYPE_E5AI    11               /* Galileo E5aI (Data) */
-#define CTYPE_E5AQ    12               /* Galileo E5aQ (Pilot) */
-#define CTYPE_E5BI    13               /* Galileo E5bI (Data) */
-#define CTYPE_E5BQ    14               /* Galileo E5bQ (Pilot) */
-#define CTYPE_E1CO    15               /* Galileo E1C overlay */
-#define CTYPE_E5AIO   16               /* Galileo E5aI overlay */
-#define CTYPE_E5AQO   17               /* Galileo E5aQ overlay */
-#define CTYPE_E5BIO   18               /* Galileo E5bI overlay */
-#define CTYPE_E5BQO   19               /* Galileo E5bQ overlay */
+#define CTYPE_L1CA    1                /* GPS L1C/A */
+#define CTYPE_L1CP    2                /* GPS L1C Pilot */
+#define CTYPE_L1CD    3                /* GPS L1C Data */
+#define CTYPE_L1CO    4                /* GPS L1C overlay */
 #define CTYPE_G1      20               /* GLONASS G1 */
 #define CTYPE_G2      21               /* GLONASS G2 */
-#define CTYPE_B1I     22               /* BeiDou B1I */
-#define CTYPE_B2I     23               /* BeiDou B2I */
-#define CTYPE_LEXS    24               /* QZSS LEX short */
-#define CTYPE_LEXL    25               /* QZSS LEX long */
-#define CTYPE_L1SAIF  26               /* QZSS L1 SAIF */
 #define CTYPE_L1SBAS  27               /* SBAS compatible L1CA */
 #define CTYPE_NH10    28               /* 10 bit Neuman-Hoffman code */
 #define CTYPE_NH20    29               /* 20 bit Neuman-Hoffman code */
@@ -275,37 +174,11 @@ extern "C" {
 #define SPEC_PLT_MW   100              /* margin (pixel) */
 #define SPEC_PLT_MH   0                /* margin (pixel) */
 
-/* QZSS LEX setting */
-#define DSAMPLEX      12               /* L1CA-LEX DCB (sample) */
-#define LEXMS         4                /* LEX short length (ms) */
-#define LENLEXPRE     4                /* LEX preamble length (byte) */
-#define LENLEXMSG     250              /* LEX message length (byte) */
-#define LENLEXRS      255              /* LEX RS data length (byte) */
-#define LENLEXRSK     223              /* LEX RS K (byte) */
-#define LENLEXRSP     (LENLEXRS-LENLEXRSK) /* LEX RS parity length (byte) */
-#define LENLEXERR     (LENLEXRSP/2)    /* RS max error correction len (byte) */
-#define LENLEXRCV     (8+LENLEXMSG-LENLEXRSP) /* LEX transmitting length */
-
-/* SBAS/QZSS L1-SAIF setting */
+/* SBAS setting */
 #define LENSBASMSG    32               /* SBAS message length 150/8 (byte) */
 #define LENSBASNOV    80               /* message length in NovAtel format */
 
 /* thread functions */
-#ifdef WIN32
-#define mlock_t       HANDLE
-#define initmlock(f)  (f=CreateMutex(NULL,FALSE,NULL))
-#define mlock(f)      WaitForSingleObject(f,INFINITE)
-#define unmlock(f)    ReleaseMutex(f)
-#define delmlock(f)   CloseHandle(f)
-#define event_t       HANDLE
-#define initevent(f)  (f=CreateEvent(NULL,FALSE,FALSE,NULL))
-#define setevent(f)   SetEvent(f)
-#define waitevent(f,m) WaitForSingleObject(f,INFINITE)
-#define delevent(f)   CloseHandle(f)
-#define waitthread(f) WaitForSingleObject(f,INFINITE)
-#define cratethread(f,func,arg) (f=(thread_t)_beginthread(func,0,arg))
-#define THRETVAL      
-#else
 #define mlock_t       pthread_mutex_t
 #define initmlock(f)  pthread_mutex_init(&f,NULL)
 #define mlock(f)      pthread_mutex_lock(&f)
@@ -319,10 +192,6 @@ extern "C" {
 #define waitthread(f) pthread_join(f,NULL)
 #define cratethread(f,func,arg) pthread_create(&f,NULL,func,arg)
 #define THRETVAL      NULL
-#endif
-
-/* type definition -----------------------------------------------------------*/
-typedef fftwf_complex cpx_t; /* complex type for fft */
 
 /* sdr initialization struct */
 typedef struct {
@@ -352,13 +221,11 @@ typedef struct {
     int outms;           /* output interval (ms) */
     int rinex;           /* rinex output flag */
     int rtcm;            /* rtcm output flag */
-    int lex;             /* QZSS LEX output flag */
-    int sbas;            /* SBAS/QZSS L1SAIF output flag */
+    int sbas;            /* SBAS output flag */
     int log;             /* tracking log output flag */
     char rinexpath[1024];/* rinex output path */
     char logpath[1024];     /* log output path, Added by Shu Wang, shuwang1@outlook.com on January 28, 2020 */ 
     int rtcmport;        /* rtcm TCP/IP port */
-    int lexport;         /* LEX TCP/IP port */
     int sbasport;        /* SBAS/L1-SAIF TCP/IP port */
     int trkcorrn;        /* number of correlation points */
     int trkcorrd;        /* interval of correlation points (sample) */
@@ -395,21 +262,19 @@ typedef struct {
 
 /* sdr acquisition struct */
 typedef struct {
-    int intg;            /* number of integration */
+
     double hband;        /* half band of search frequency (Hz) */
     double step;         /* frequency search step (Hz) */
-    int nfreq;           /* number of search frequency */
     double *freq;        /* search frequency (Hz) */
     int acqcodei;        /* acquired code phase */
     int freqi;           /* acquired frequency index */
     double acqfreq;      /* acquired frequency (Hz) */
-    int nfft;            /* number of FFT points */
     double cn0;          /* signal C/N0 */ 
     double peakr;        /* first/second peak ratio */
 
     fftwf_complex *xcode[6];
 
-    uint8_t noncoherentintegration[3];
+    uint8_t noncoherentintegration[3];  /* number of integration */
 
     uint16_t coherencelen_code[3];
     uint32_t fftlen[3];                 /* number of FFT points */
@@ -478,7 +343,7 @@ typedef struct {
 
 /* sdr ephemeris struct */
 typedef struct {
-    eph_t eph;           /* GPS/QZS/GAL/COM ephemeris struct (from rtklib.h) */
+    eph_t eph;           /* GPS/GAL/COM ephemeris struct (from rtklib.h) */
     geph_t geph;         /* GLO ephemeris struct (from rtklib.h) */
     int ctype;           /* code type */
     double tow_gpst;     /* ephemeris tow in GPST */
@@ -496,11 +361,6 @@ typedef struct {
     int toe_bds,f1p3,cucp4,ep5,cicp6,i0p7,OMGdp8,omgp9;
     unsigned int f1p4,cucp5,ep6,cicp7,i0p8,OMGdp9,omgp10;
 } sdreph_t;
-
-/* sdr LEX struct */
-typedef struct {
-    unsigned char msg[LENLEXMSG]; /* LEX message (250bytes/s) */
-} sdrlex_t;
 
 /* sdr SBAS struct */
 typedef struct {
@@ -545,7 +405,6 @@ typedef struct {
     int flagtow;         /* first subframe found flag */
     int flagdec;         /* navigation data decoded flag */
     sdreph_t sdreph;     /* sdr ephemeris struct */
-    sdrlex_t lex;        /* QZSS LEX message struct */
     sdrsbas_t sbas;      /* SBAS message struct */
 } navigation_t;
 
@@ -565,8 +424,8 @@ typedef struct {
     double f_if;         /* intermediate frequency (Hz) */
     double foffset;      /* frequency offset (Hz) */
     short *code;         /* original code */
-    cpx_t *xcode;        /* resampled code in frequency domain */
-    cpx_t *codex;        /* resampled code in frequency domain */
+    fftw_complex *xcode;        /* resampled code in frequency domain */
+    fftw_complex *codex;        /* resampled code in frequency domain */
     int clen;            /* code length */
     double crate;        /* code chip rate (Hz) */
     double ctime;        /* code period (s) */
@@ -585,9 +444,6 @@ typedef struct {
 /* sdr plotting struct */
 typedef struct {
     FILE *fp;            /* file pointer (gnuplot pipe) */
-#ifdef WIN32
-    HWND hw;             /* window handle */
-#endif
     int nx;              /* length of x data */
     int ny;              /* length of y data */
     double *x;           /* x data */
@@ -609,11 +465,7 @@ typedef struct {
 typedef struct {
     thread_t hsoc;       /* thread handle */
     int port;            /* port number */
-#ifdef WIN32
-    SOCKET s_soc,c_soc;  /* server/client socket */
-#else
     int s_soc,c_soc;     /* server/client socket */
-#endif
     int flag;            /* connection flag */
 } sdrsoc_t;
 
@@ -623,7 +475,6 @@ typedef struct {
     obsd_t *obsd;        /* observation struct (defined in rtklib.h) */
     rnxopt_t opt;        /* rinex option struct (defined in rtklib.h) */
     sdrsoc_t soc_rtcm;   /* sdr socket struct for rtcm output */
-    sdrsoc_t soc_lex;    /* sdr socket struct for lex output */
     sdrsoc_t soc_sbas;   /* sdr socket struct for sbas output */
     char rinexobs[1024]; /* rinex observation file name */
     char rinexnav[1024]; /* rinex navigation file name */
@@ -650,8 +501,6 @@ extern mlock_t hreadmtx;      /* buffloc access mutex */
 extern mlock_t hfftmtx;       /* fft function mutex */
 extern mlock_t hpltmtx;       /* plot function mutex */
 extern mlock_t hobsmtx;       /* observation data access mutex */
-extern mlock_t hlexmtx;       /* QZSS LEX mutex */
-extern event_t hlexeve;       /* QZSS LEX event */
 
 extern sdrini_t sdrini;       /* sdr initialization struct */
 extern sdrstat_t sdrstat;     /* sdr state struct */
@@ -659,41 +508,59 @@ extern sdrch_t sdrch[MAXSAT]; /* sdr channel structs */
 extern sdrspec_t sdrspec;     /* sdr spectrum analyzer structs */
 extern sdrout_t sdrout;       /* sdr output structs */
 
-/* sdrmain.c -----------------------------------------------------------------*/
-#ifdef GUI
-extern GCHandle hform;
-extern void initsdrgui(maindlg^ form, sdrini_t* sdrinigui);
-extern void startsdr(void *arg);
-#else
-extern void startsdr(void);
-#endif
-extern void quitsdr(sdrini_t *ini, int stop);
-#ifdef WIN32
-extern void statemachinethread(void *arg);
-#else
+/** main.c **/
+extern void start_erlangnetwork_gnssmeasurementengine(void);
+extern void quit_erlangnetwork_gnssmeasurementengine(sdrini_t *ini, int stop);
+
+/** statemachine.c **/
 extern void *statemachinethread(void *arg);
-#endif
 
 /* sdrsync.c -----------------------------------------------------------------*/
-#ifdef WIN32
-extern void syncthread(void * arg);
-#else
 extern void *syncthread(void * arg);
-#endif
 
-/* sdracq.c ------------------------------------------------------------------*/
+/** acquisition.c **/
 extern uint64_t acquisition(sdrch_t *sdr, double *power);
-extern int checkacquisition(double *P, sdrch_t *sdr);
 
-
-/* sdrtrk.c ------------------------------------------------------------------*/
-extern uint64_t sdrtracking(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt);
+/* tracking.c **/
+extern uint64_t tracking(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt);
 extern void cumsumcorr(sdrtrk_t *trk, int polarity);
 extern void clearcumsumcorr(sdrtrk_t *trk);
 extern void pll(sdrch_t *sdr, sdrtrkprm_t *prm, double dt);
 extern void dll(sdrch_t *sdr, sdrtrkprm_t *prm, double dt);
 extern void setobsdata(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt, 
                        sdrtrk_t *trk, int flag);
+extern void dot_22(const short *a1, const short *a2, const short *b1, 
+                   const short *b2, int n, double *d1, double *d2);
+extern void dot_23(const short *a1, const short *a2, const short *b1, 
+                   const short *b2, const short *b3, int n, double *d1, 
+                   double *d2);
+extern void correlator(const char *data, int dtype, double ti, int n, 
+                       double freq, double phi0, double crate, double coff, 
+                       int* s, int ns, double *II, double *QQ, double *remc, 
+                       double *remp, short* codein, int coden);
+
+/** acquisition_initialization.c **/
+int initialize_acqusition_struct( 
+                acquisition_t *acq, 
+                int ctype,
+                uint16_t *coherencelen_code,
+                uint16_t codelen_sample,
+                double intfreq_Hz,
+                double offset_Hz );
+extern int initialize_measurement_channel(int chno,
+                        int sys, 
+                        int prn, 
+                        int ctype, 
+                        int dtype,
+                        int ftype, 
+                        double f_cf, 
+                        double f_sf, 
+                        double f_if,
+                        sdrch_t *sdr );
+
+/** tracking_initialization.c  ***/
+extern int initialize_tracking_structure( int sat, int ctype, double ctime, sdrtrk_t *trk );
+extern int initialize_navigation_structure(int sys, int ctype, int prn, navigation_t *nav);
 
 /* sdrinit.c -----------------------------------------------------------------*/
 extern int readinifile( sdrini_t *ini, const char *inifile );  /** Modified by Shu Wang, shuwang1@outlook.com, on January 28, 2020*/
@@ -714,54 +581,22 @@ extern void freesdrch(sdrch_t *sdr);
 /* sdrcmn.c ------------------------------------------------------------------*/
 extern int getfullpath(char *relpath, char *abspath);
 extern unsigned long tickgetus(void);
-extern void sleepus(int usec);
 extern void settimeout(struct timespec *timeout, int waitms);
-extern double log2(double n);
 extern int calcfftnum(double x, int next);
-extern void *sdrmalloc(size_t size);
-extern void sdrfree(void *p);
-extern cpx_t *cpxmalloc(int n);
-extern void cpxfree(cpx_t *cpx);
-extern void cpxfft(fftwf_plan plan, cpx_t *cpx, int n);
-extern void cpxifft(fftwf_plan plan, cpx_t *cpx, int n);
-extern void cpxcpx(const short *II, const short *QQ, double scale, int n,
-                   cpx_t *cpx);
-extern void cpxcpxf(const float *II, const float *QQ, double scale,  int n,
-                    cpx_t *cpx);
-extern void cpxconv(fftwf_plan plan, fftwf_plan iplan, cpx_t *cpxa, cpx_t *cpxb,
-                    int m, int n, int flagsum, double *conv);
-extern void cpxpspec(fftwf_plan plan, cpx_t *cpx, int n, int flagsum,
-                     double *pspec);
-extern void dot_21(const short *a1, const short *a2, const short *b, int n, 
-                   double *d1, double *d2);
-extern void dot_22(const short *a1, const short *a2, const short *b1, 
-                   const short *b2, int n, double *d1, double *d2);
-extern void dot_23(const short *a1, const short *a2, const short *b1, 
-                   const short *b2, const short *b3, int n, double *d1, 
-                   double *d2);
-extern double mixcarr(const char *data, int dtype, double ti, int n, 
-                      double freq, double phi0, short *II, short *QQ);
-extern void mulvcs(const char *data1, const short *data2, int n, short *out);
-extern void sumvf(const float *data1, const float *data2, int n, float *out);
-extern void sumvd(const double *data1, const double *data2, int n, double *out);
-extern int maxvi(const int *data, int n, int exinds, int exinde, int *ind);
-extern float maxvf(const float *data, int n, int exinds, int exinde, int *ind);
-extern double maxvd(const double *data, int n, int exinds, int exinde,int *ind);
+extern void cpxfft( fftw_plan plan, fftw_complex *cpx, int n );
+extern void cpxifft( fftw_plan plan, fftw_complex *cpx, int n );
+extern void cpxcpx( const short *II, const short *QQ, double scale, int n, fftw_complex *cpx);
+extern double maxvd(const double *data, int n, int exinds, int exinde, int *ind);
 extern double meanvd(const double *data, int n, int exinds, int exinde);
+extern void cpxconv( fftw_plan plan, fftw_plan iplan, fftw_complex *cpxa, fftwf_complex *cpxb, int m, int n, int flagsum, double *conv);
+extern void cpxpspec( fftw_plan plan, fftw_complex *cpx, int n, int flagsum, double *pspec);
+extern double mixcarr( const char *data, int dtype, double ti, int n,  double freq, double phi0, short *II, short *QQ);
 extern double interp1(double *x, double *y, int n, double t);
 extern void uint64todouble(uint64_t *data, uint64_t base, int n, double *out);
 extern void ind2sub(int ind, int nx, int ny, int *subx, int *suby);
 extern void shiftdata(void *dst, void *src, size_t size, int n);
 extern double rescode(const short *code, int len, double coff, int smax, 
                       double ci, int n, short *rcode);
-extern void pcorrelator(const char *data, int dtype, double ti, int n, 
-                        double *freq, int nfreq, double crate, int m, 
-                        cpx_t* codex, double *P);
-extern void correlator(const char *data, int dtype, double ti, int n, 
-                       double freq, double phi0, double crate, double coff, 
-                       int* s, int ns, double *II, double *QQ, double *remc, 
-                       double *remp, short* codein, int coden);
-
 /* sdrcode.c -----------------------------------------------------------------*/
 extern short *gencode(int prn, int ctype, int *len, double *crate);
 
@@ -782,8 +617,8 @@ extern void plotbox(FILE *fp, double *x, double *y, int n, int skip, double s);
 extern void plotthread(sdrplt_t *plt);
 extern void plot(sdrplt_t *plt);
 
-/* sdrnav.c ------------------------------------------------------------------*/
-extern void sdrnavigation(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt);
+/* navigation.c ------------------------------------------------------------------*/
+extern void navigation(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt);
 extern uint32_t getbitu2(const uint8_t *buff, int p1, int l1, int p2, int l2);
 extern int32_t getbits2(const uint8_t *buff, int p1, int l1, int p2, int l2);
 extern uint32_t getbitu3(const uint8_t *buff, int p1, int l1, int p2, int l2, 
@@ -801,7 +636,7 @@ extern int paritycheck(navigation_t *nav);
 extern int findpreamble(navigation_t *nav);
 extern int decodenav(navigation_t *nav);
 extern void check_hamming(int *hamming, int n, int parity, int m);
-
+extern int maxvi(const int *data, int n, int exinds, int exinde, int *ind);
 /* sdrnav_gps/gal/glo.c/sbs.c ------------------------------------------------*/
 extern int decode_l1ca(navigation_t *nav);
 extern int decode_e1b(navigation_t *nav);
@@ -839,11 +674,7 @@ extern void file_getbuff(uint64_t buffloc, int n, int ftype, int dtype,
 
 /* sdrspec.c -----------------------------------------------------------------*/
 extern void initsdrspecgui(sdrspec_t* sdrspecgui);
-#ifdef WIN32
-extern void specthread(void * arg);
-#else
 extern void *specthread(void * arg);
-#endif
 extern int initspecpltstruct(sdrspec_t *spec);
 extern void quitspecpltstruct(sdrspec_t *spec);
 extern void calchistgram(char *data, int dtype, int n, double *xI, double *yI, 
@@ -851,13 +682,6 @@ extern void calchistgram(char *data, int dtype, int n, double *xI, double *yI,
 extern void hanning(int n, float *win);
 extern int spectrumanalyzer(const char *data, int dtype, int n, double f_sf, 
                             int nfft, double *freq, double *pspec);
-
-/* sdrlex.c ------------------------------------------------------------------*/
-#ifdef WIN32
-extern void lexthread(void *arg);
-#else
-extern void *lexthread(void *arg);
-#endif
 
 #ifdef __cplusplus
 }

@@ -155,22 +155,15 @@ extern int initsdrplot(sdrplt_t *plt)
         return -1;
     }
     /* pipe open */
-#ifdef WIN32
-    if (!(plt->fp=_popen(".\\gnuplot\\gnuplot.exe","w"))) {
-#else
+
     if (!(plt->fp=popen("gnuplot","w"))) {
-#endif
+
         unmlock(hpltmtx);
         debug_print("error: gnuplot doesn't exist \n");
         return -1;
     }
-    sleepms(200);
+    sleepms(20000);
     unmlock(hpltmtx);
-#ifdef GUI
-    /* hide window */
-    plt->hw=FindWindow(NULL,"c:\\Windows\\system32\\cmd.exe");
-    ShowWindow(plt->hw,SW_HIDE);
-#endif
     return 0;
 }
 /* quit plot function ----------------------------------------------------------

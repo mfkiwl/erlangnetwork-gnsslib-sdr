@@ -12,7 +12,7 @@
 *          uint64_t cnt      I   counter of sdr channel thread
 * return : uint64_t              current buffer location
 *-----------------------------------------------------------------------------*/
-extern uint64_t sdrtracking(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
+extern uint64_t tracking(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
 {
     char *data=NULL;
     uint64_t bufflocnow;
@@ -20,7 +20,7 @@ extern uint64_t sdrtracking(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
     sdr->flagtrk=OFF;
 
     /* memory allocation */
-    data=(char*)sdrmalloc(sizeof(char)*(sdr->nsamp+100)*sdr->dtype);
+    data=(char*)malloc(sizeof(char)*(sdr->nsamp+100)*sdr->dtype);
 
     /* current buffer location */
     mlock(hreadmtx);
@@ -43,13 +43,13 @@ extern uint64_t sdrtracking(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt)
             &sdr->trk.remcode,&sdr->trk.remcarr,sdr->code,sdr->clen);
 
         /* navigation data */
-        sdrnavigation(sdr,buffloc,cnt);
+        navigation(sdr,buffloc,cnt);
 
         sdr->flagtrk=ON;
     } else {
         sleepms(1);
     }
-    sdrfree(data);
+    free(data);
     return bufflocnow;
 }
 /* cumulative sum of correlation output ----------------------------------------
@@ -206,4 +206,126 @@ extern void setobsdata(sdrch_t *sdr, uint64_t buffloc, uint64_t cnt,
         trk->codeisum[0]=buffloc;
         trk->Isum=0;
     }
+}
+
+/* dot products: d1={dot(a1,b1),dot(a1,b2)},d2={dot(a2,b1),dot(a2,b2)} ---------
+* args   : short  *a1       I   input short array
+*          short  *a2       I   input short array
+*          short  *b1       I   input short array
+*          short  *b2       I   input short array
+*          int    n         I   number of input data
+*          short  *d1       O   output short array
+*          short  *d2       O   output short array
+* return : none
+*-----------------------------------------------------------------------------*/
+extern void dot_22(const short *a1, const short *a2, const short *b1,
+                   const short *b2, int n, double *d1, double *d2)
+{
+    const short *p1=a1,*p2=a2,*q1=b1,*q2=b2;
+
+
+    d1[0]=d1[1]=d2[0]=d2[1]=0.0;
+
+    for (;p1<a1+n;p1++,p2++,q1++,q2++) {
+        d1[0]+=(*p1)*(*q1);
+        d1[1]+=(*p1)*(*q2);
+        d2[0]+=(*p2)*(*q1);
+        d2[1]+=(*p2)*(*q2);
+    }
+
+}
+/* dot products: d1={dot(a1,b1),dot(a1,b2),dot(a1,b3)},d2={...} ----------------
+* args   : short  *a1       I   input short array
+*          short  *a2       I   input short array
+*          short  *b1       I   input short array
+*          short  *b2       I   input short array
+*          short  *b3       I   input short array
+*          int    n         I   number of input data
+*          short  *d1       O   output short array
+*          short  *d2       O   output short array
+* return : none
+*-----------------------------------------------------------------------------*/
+extern void dot_23(const short *a1, const short *a2, const short *b1,
+                   const short *b2, const short *b3, int n, double *d1,
+                   double *d2)
+{
+    const short *p1=a1,*p2=a2,*q1=b1,*q2=b2,*q3=b3;
+
+    d1[0]=d1[1]=d1[2]=d2[0]=d2[1]=d2[2]=0.0;
+
+    for (;p1<a1+n;p1++,p2++,q1++,q2++,q3++) {
+        d1[0]+=(*p1)*(*q1);
+        d1[1]+=(*p1)*(*q2);
+        d1[2]+=(*p1)*(*q3);
+        d2[0]+=(*p2)*(*q1);
+        d2[1]+=(*p2)*(*q2);
+        d2[2]+=(*p2)*(*q3);
+    }
+
+}
+
+/* correlator ------------------------------------------------------------------
+* multiply sampling data and carrier (I/Q), multiply code (E/P/L), and integrate
+* args   : char   *data     I   sampling data vector (n x 1 or 2n x 1)
+*          int    dtype     I   sampling data type (1:real,2:complex)
+*          double ti        I   sampling interval (s)
+*          int    n         I   number of samples
+*          double freq      I   carrier frequency (Hz)
+*          double phi0      I   carrier initial phase (rad)
+*          double crate     I   code chip rate (chip/s)
+*          double coff      I   code chip offset (chip)
+*          int    s         I   correlator points (sample)
+*          short  *I,*Q     O   correlation power I,Q
+*                                 I={I_P,I_E1,I_L1,I_E2,I_L2,...,I_Em,I_Lm}
+*                                 Q={Q_P,Q_E1,Q_L1,Q_E2,Q_L2,...,Q_Em,Q_Lm}
+* return : none
+* notes  : see above for data
+*-----------------------------------------------------------------------------*/
+extern void correlator(const char *data, int dtype, double ti, int n, 
+                       double freq, double phi0, double crate, double coff, 
+                       int* s, int ns, double *II, double *QQ, double *remc, 
+                       double *remp, short* codein, int coden)
+{
+#define CSCALE        (1.0/32.0)       /* carrier lookup table scale (LSB) */
+
+    short *dataI=NULL,*dataQ=NULL,*code_e=NULL,*code;
+    int i;
+    int smax=s[ns-1];
+
+    /* 8 is treatment of remainder in SSE2 */
+    if( !( dataI = (short *) malloc(sizeof(short)*(n+64)) ) ) {
+            debug_print("error: correlator dataI memory allocation\n");
+            return;
+    }
+
+    if( !( dataQ = (short *) malloc(sizeof(short)*(n+64)) ) ) {
+            debug_print("error: correlator dataQ memory allocation\n");
+            return;
+    }
+
+    if( !( code_e = (short *) malloc(sizeof(short)*(n+2*smax)) ) ) {
+            debug_print("error: correlator code_e memory allocation\n");
+            return;
+    }
+    code=code_e+smax;
+
+    /* mix local carrier */
+    *remp=mixcarr(data,dtype,ti,n,freq,phi0,dataI,dataQ);
+
+    /* resampling code */
+    *remc=rescode(codein,coden,coff,smax,ti*crate,n,code_e);
+
+    /* multiply code and integrate */
+    dot_23(dataI,dataQ,code,code-s[0],code+s[0],n,II,QQ);
+    for (i=1;i<ns;i++) {
+        dot_22(dataI,dataQ,code-s[i],code+s[i],n,II+1+i*2,QQ+1+i*2);
+    }
+    for (i=0;i<1+2*ns;i++) {
+        II[i]*=CSCALE;
+        QQ[i]*=CSCALE;
+    }
+    free(dataI); free(dataQ); free(code_e);
+    dataI=dataQ=code_e=NULL;
+
+#undef CSALE
 }

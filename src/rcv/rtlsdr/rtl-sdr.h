@@ -33,8 +33,14 @@ typedef struct rtlsdr_dev rtlsdr_dev_t;
     
 #define RTLSDR_SAMPLE_RATE      2048000
 #define RTLSDR_FREQUENCY        1575420000
-#define RTLSDR_ASYNC_BUF_NUMBER 32
-#define RTLSDR_DATABUFF_SIZE    16384
+#define RTLSDR_ASYNC_BUF_NUMBER 64
+//#define RTLSDR_DATABUFF_SIZE    16384
+/** 4 ms*/
+//#define RTLSDR_DATABUFF_SIZE    81920 
+/** 20 ms*/
+#define RTLSDR_DATABUFF_SIZE    122880 
+/** 30 ms*/
+
 extern int rtlsdr_init( int carrierfreq_kHz, int samplingfreq_Hz  );
 extern void rtlsdr_quit(void);
 extern int rtlsdr_initconf( int carrierfreq_kHz, int samplingfreq_Hz );

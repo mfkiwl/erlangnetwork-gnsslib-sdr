@@ -8,9 +8,6 @@
 #include "measurement_engine.h"
 
 /* global variables ----------------------------------------------------------*/
-#ifdef GUI
-GCHandle hform;
-#endif
 
 /* thread handle and mutex */
 thread_t hmainthread;
@@ -22,8 +19,6 @@ mlock_t hreadmtx;
 mlock_t hfftmtx;
 mlock_t hpltmtx;
 mlock_t hobsmtx;
-mlock_t hlexmtx;
-event_t hlexeve;
 
 /* sdr structs */
 sdrini_t sdrini={0};
@@ -32,36 +27,13 @@ sdrch_t sdrch[MAXSAT]={{0}};
 sdrspec_t sdrspec={0};
 sdrout_t sdrout={0};
 
-/* initsdrgui ------------------------------------------------------------------
-* initialize sdr gui application  
-* args   : maindlg^ form       I   main dialog class
-*          sdrini_t* sdrinigui I   sdr init struct
-* return : none
-* note : This function is only used in GUI application 
-*-----------------------------------------------------------------------------*/
-#ifdef GUI
-extern void initsdrgui(maindlg^ form, sdrini_t* sdrinigui)
-{
-    /* initialization global structs */
-    memset(&sdrini,0,sizeof(sdrini));
-    memset(&sdrstat,0,sizeof(sdrstat));
-    memset(&sdrch,0,sizeof(sdrch));
-
-    hform=GCHandle::Alloc(form);
-    memcpy(&sdrini,sdrinigui,sizeof(sdrini_t)); /* copy setting from GUI */
-}
-#else
 /* keyboard thread -------------------------------------------------------------
 * keyboard thread for program termination  
 * args   : void   *arg      I   not used
 * return : none
 * note : this thread is only created in CLI application
 *-----------------------------------------------------------------------------*/
-#ifdef WIN32
-extern void keythread(void * arg) 
-#else
 extern void *keythread(void * arg) 
-#endif
 {
     do {
         switch(getchar()) {
@@ -86,6 +58,7 @@ extern void *keythread(void * arg)
 int main( int argc, char **argv )
 {
     if( argc < 2 ){
+
         char inifilename[] = "./gnss-sdrcli.ini";
         /* read ini file */
         if (readinifile( &sdrini, inifilename )<0) {
@@ -95,18 +68,21 @@ int main( int argc, char **argv )
     }else{
 
         if( readinifile( &sdrini, argv[1] )<0) {
-            return -1; 
+            return -3; 
         }
 
     }
     
-    cratethread(hkeythread,keythread,NULL);
+    cratethread( hkeythread, keythread, NULL );
 
-    startsdr();
+    /* FFT initialization */
+    fftw_init_threads();
+
+    start_erlangnetwork_gnssmeasurementengine();
 
     return 0;
 }
-#endif
+
 /* sdr start -------------------------------------------------------------------
 * start sdr function  
 * args   : void   *arg      I   not used
@@ -114,41 +90,49 @@ int main( int argc, char **argv )
 * note : This function is called as thread in GUI application and is called as
 *        function in CLI application
 *-----------------------------------------------------------------------------*/
-#ifdef GUI
-extern void startsdr(void *arg) /* call as thread */
-#else
-extern void startsdr(void) /* call as function */
-#endif
+extern void start_erlangnetwork_gnssmeasurementengine(void) /* call as function */
 {
     int i;
-    debug_print("ERLANG NETWORK gnss-sdrlib start!\n");
+    debug_print("Erlang Network GNSSLib start!\n");
 
     /* check initial value */
     if (chk_initvalue(&sdrini)<0) {
         debug_print("error: chk_initvalue\n");
-        quitsdr(&sdrini,1);
+        quit_erlangnetwork_gnssmeasurementengine( &sdrini, 1 );
         return;
     }
 
     /* receiver initialization */
     if (rcvinit(&sdrini)<0) {
         debug_print("error: rcvinit\n");
-        quitsdr(&sdrini,1);
+        quit_erlangnetwork_gnssmeasurementengine( &sdrini, 1 );
         return;
     }
-    /* initialize sdr channel struct */
-    for (i=0;i<sdrini.nch;i++) {
 
-        if (initsdrch(i+1,sdrini.sys[i], sdrini.prn[i],sdrini.ctype[i],
-            sdrini.dtype[sdrini.ftype[i]-1],sdrini.ftype[i],
-            sdrini.f_cf[sdrini.ftype[i]-1],sdrini.f_sf[sdrini.ftype[i]-1],
-            sdrini.f_if[sdrini.ftype[i]-1],&sdrch[i])<0) {
-            
-            debug_print("error: initsdrch\n");
-            quitsdr(&sdrini,2);
+    /* start grabber */
+    debug_print("start receiver hardware!\n");
+    if (rcvgrabstart(&sdrini)<0) {
+        quit_erlangnetwork_gnssmeasurementengine( &sdrini, 4 );
+        return;
+    }
+
+    /* initialize sdr channel struct */
+    for( i=0;i<sdrini.nch;i++) {
+
+        if( initialize_measurement_channel( i+1,
+                        sdrini.sys[i],
+                        sdrini.prn[i],
+                        sdrini.ctype[i],
+                        sdrini.dtype[sdrini.ftype[i]-1],
+                        sdrini.ftype[i],
+                        sdrini.f_cf[sdrini.ftype[i]-1],
+                        sdrini.f_sf[sdrini.ftype[i]-1],
+                        sdrini.f_if[sdrini.ftype[i]-1],
+                        &sdrch[i] ) < 0 ) {           
+            debug_print( "error: initalize_measurement_channel, chno=%d, sys=%d, prn=%d f_sf=%f, %f\n", i+1, sdrini.sys[i], sdrini.prn[i], sdrini.f_sf[0], sdrini.f_sf[1] );
+            quit_erlangnetwork_gnssmeasurementengine( &sdrini, 2 );
             return;
         }
-
     }
 
     /* mutexes and events */
@@ -160,7 +144,7 @@ extern void startsdr(void) /* call as function */
     /* sdr channel thread */
     for (i=0;i<sdrini.nch;i++) {
 
-        debug_print("%s sys=%d prn=%02d ctype=%d dtype=%d ftype=%d f_cf=%.0f f_sf=%.0f f_if=%.0f clen=%d crate=%.0f nsamp=%d\n", 
+        if(1) debug_print("%s sys=%d prn=%02d ctype=%d dtype=%d ftype=%d f_cf=%.0f f_sf=%.0f f_if=%.0f clen=%d crate=%.0f nsamp=%d coherencelen_code[0]=%d\n", 
             sdrch[i].satstr,
             sdrch[i].sys,
             sdrch[i].prn,
@@ -172,46 +156,15 @@ extern void startsdr(void) /* call as function */
             sdrch[i].f_if,
             sdrch[i].clen,
             sdrch[i].crate,
-            sdrch[i].nsamp );
+            sdrch[i].nsamp,
+            sdrch[i].acq.coherencelen_code[0] );
 
         if (sdrch[i].ctype==CTYPE_L1CA  || sdrch[i].ctype==CTYPE_G1  ||
-            sdrch[i].ctype==CTYPE_E1B   || sdrch[i].ctype==CTYPE_B1I ||
-            sdrch[i].ctype==CTYPE_L1SBAS|| sdrch[i].ctype==CTYPE_L1SAIF ){   /* GPS/QZS/GLO/GAL/CMP L1 */
+            sdrch[i].ctype==CTYPE_L1SBAS ){   /* GPS/GLO/GAL/CMP L1 */
 
             cratethread( sdrch[i].hsdr, statemachinethread, &sdrch[i] ) ;
 
-        }else if ( sdrch[i].ctype==CTYPE_L2CM ){   /* GPS L2 */
-            
-            cratethread( sdrch[i].hsdr, statemachinethread, &sdrch[i] );
-
-        }else if (sdrch[i].sys==SYS_QZS && sdrch[i].ctype==CTYPE_LEXS) {  /* QZSS LEX */
-
-            sdrini.nchL6++;
-            cratethread(sdrch[i].hsdr,lexthread,&sdrch[i]);
-
-            /* create QZSS L1CA channel */
-            initsdrch(sdrini.nch+1,SYS_QZS,193,CTYPE_L1CA,DTYPEI,FTYPE1,
-               sdrini.f_cf[0],sdrini.f_sf[0],sdrini.f_if[0],&sdrch[sdrini.nch]);
-
-            cratethread(sdrch[sdrini.nch].hsdr,statemachinethread,&sdrch[sdrini.nch]);
         }
-    }
-#ifndef GUI
-    /* sdr spectrum analyzer */
-    if (sdrini.pltspec) {
-        sdrspec.dtype=sdrini.dtype[sdrini.pltspec-1];
-        sdrspec.ftype=sdrini.ftype[sdrini.pltspec-1];
-        sdrspec.nsamp=(int)(sdrini.f_sf[sdrini.pltspec-1]/1000); /* 1ms */
-        sdrspec.f_sf=sdrini.f_sf[sdrini.pltspec-1];
-        cratethread(hspecthread,specthread,&sdrspec);
-    }
-#endif
-
-    /* start grabber */
-    debug_print("start receiver hardware!\n");
-    if (rcvgrabstart(&sdrini)<0) {
-        quitsdr(&sdrini,4);
-        return;
     }
 
     /* data grabber loop */
@@ -227,9 +180,9 @@ extern void startsdr(void) /* call as function */
         waitthread(sdrch[i].hsdr);
 
     /* sdr termination */
-    quitsdr(&sdrini,0);
+    quit_erlangnetwork_gnssmeasurementengine( &sdrini, 0 );
 
-    debug_print("ERLANG NETWORK gnss-sdrlib is finished!\n");
+    debug_print("Erlang Network GNSSLib is finished!\n");
 }
 /* sdr termination -------------------------------------------------------------
 * sdr termination process  
@@ -237,13 +190,10 @@ extern void startsdr(void) /* call as function */
 * args   : int    stop      I   stop position in function 0: run all
 * return : none
 *-----------------------------------------------------------------------------*/
-extern void quitsdr(sdrini_t *ini, int stop)
+extern void quit_erlangnetwork_gnssmeasurementengine(sdrini_t *ini, int stop)
 {
     int i;
-#ifdef GUI
-    maindlg^form=static_cast<maindlg^>(hform.Target);
-    form->guistop();
-#endif
+
     if (stop==1) return;
 
     /* sdr termination */

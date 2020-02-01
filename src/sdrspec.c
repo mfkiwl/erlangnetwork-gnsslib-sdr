@@ -23,11 +23,7 @@ extern void initsdrspecgui(sdrspec_t *sdrspecgui)
 * args   : void * arg       I   sdr spectrum struct
 * return : none
 *-----------------------------------------------------------------------------*/
-#ifdef WIN32
-extern void specthread(void * arg) 
-#else
 extern void *specthread(void * arg) 
-#endif
 {
     sdrspec_t *spec=(sdrspec_t*)arg;
     char *data;
@@ -235,13 +231,13 @@ extern int spectrumanalyzer(const char *data, int dtype, int n, double f_sf,
     int i,j,k,zuz,nwin=nfft/2,maxshift=n-nwin;
     float *x,*xxI,*xxQ,*win;
     double *s;
-    cpx_t *xxx;
+    fftw_complex *xxx;
 
     if (!(x  =(float*)malloc(sizeof(float)*n*dtype)) || 
         !(xxI=(float*)malloc(sizeof(float)*nfft*2)) ||
         !(xxQ=(float*)malloc(sizeof(float)*nfft*2)) ||
         !(s  =(double*)calloc(sizeof(double),nfft*2)) ||
-        !(xxx=cpxmalloc(nfft*2)) ||
+        !(xxx=fftw_malloc( sizeof(fftw_complex)*nfft*2 + 32 )) ||
         !(win=(float*)malloc(sizeof(float)*nwin))) {
             debug_print("error: spectrumanalyzer memory allocation\n"); return -1;
     }
@@ -291,6 +287,6 @@ extern int spectrumanalyzer(const char *data, int dtype, int n, double f_sf,
             freq[i]=(-f_sf/2+i*f_sf/nfft/2)/1e6; /* MHz */
         }
     }
-    free(x); free(xxI); free(xxQ); free(s); free(win); cpxfree(xxx);
+    free(x); free(xxI); free(xxQ); free(s); free(win); fftw_free(xxx);
     return 0;
 }
