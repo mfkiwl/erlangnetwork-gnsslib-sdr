@@ -1,10 +1,10 @@
-Erlang Network GNSS-SDRLIB v3.0 (Community Edition)
+Erlang Network GNSSLib v3.0 (Community Edition)
 ===============================================================================
 An Open Source GNSS Software Defined Radio Library Provided by Erlang Network
 
 System Requirements
 -------------------------------------------------------------------------------
-* Erlang Network GNSS-SDRLIB works on various Debian based Linux distributions.
+* Erlang Network GNSSLib works on various Debian based Linux distributions.
 * The software package dependancy includes fftw, rtl-sdr, libusb, ka9q-fec, RTKLIB.
 
 Authors
@@ -32,9 +32,6 @@ Features
 * Support following signals (tracking and decoding navigation message) 
     * GPS L1CA
     * GLONASS G1
-    * Galileo E1B
-    * BeiDou B1I
-    * QZSS L1CA/SAIF/LEX
     * SBAS L1
 * Support following front-ends for real-time positioning
     * NSL Stereo <http://www.nsl.eu.com/primo.html>
@@ -46,7 +43,7 @@ Features
 Directory and Files
 -------------------------------------------------------------------------------
     ./bin                   Executable APs for Windows  
-        ./gnss-sdrcli       Real-time GNSS signal processing AP (CLI)  
+        ./erlang-gnss       Real-time GNSS signal processing AP (CLI)  
         ./gnss-sdrcli.ini   Configuration file for CLI AP  
         ./Makefile          Makefile
     ./frontend              Directory of front-end configuration files  
@@ -56,7 +53,6 @@ Directory and Files
         ./sdrcmn.c          Functions related to common and shared operations  
         ./sdrcode.c         Functions related to generation of ranging code  
         ./sdrinit.c         Functions related to initialization/end process  
-        ./sdrlex.c          Functions related to QZSS LEX decoding  
         ./sdrmain.c         Main function  
         ./sdrnav.c          Functions related to navigation data  
         ./sdrnav_gps.c      Functions related to decoding GPS nav. data  
@@ -77,7 +73,8 @@ Directory and Files
         ./fftw3
     ./test                  Test data  
         ./data              Test IF data  
-        ./output            Default RINEX output directory  
+        ./output            Default RINEX output directory
+    ./output
 
 
 License
@@ -85,7 +82,6 @@ License
 Copyright (C) 2020 Shu Wang shuwang1@outlook.com 
 
 Copyright (C) 2014 Taro Suzuki gnsssdrlib@gmail.com
-
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
