@@ -10,3 +10,6 @@
 [submodule "src/rcv/rtl-sdr"]
 	path = src/rcv/rtl-sdr
 	url = https://github.com/osmocom/rtl-sdr.git
+[submodule "lib/cJSON"]
+	path = lib/cJSON
+	url = https://github.com/DaveGamble/cJSON.git
