@@ -5,6 +5,7 @@ An Open Source GNSS Measurement Engine Software Defined Radio Library Provided b
 System Requirements
 -------------------------------------------------------------------------------
 * Erlang Network GNSSLib works on both macOS and various Debian based Linux distributions.
+* The software package dependancy includes cJSON, fftw, rtl-sdr, libusb, ka9q-fec, RTKLIB.
 
 Authors
 -------------------------------------------------------------------------------
